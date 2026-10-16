@@ -1,0 +1,123 @@
+/* Direction C — "Chamoy After Dark": the shop at night.
+   Weighting: plum-black ground, neon pink as light, chamoy red + mango + Tajín as heat, a flash of grass green. */
+@import "@fontsource/unbounded/latin-600.css";
+@import "@fontsource/unbounded/latin-800.css";
+@import "@fontsource/manrope/latin-400.css";
+@import "@fontsource/manrope/latin-600.css";
+@import "@fontsource/manrope/latin-700.css";
+@import "@fontsource/manrope/latin-800.css";
+@import "@fontsource/sacramento/latin-400.css";
+@import "@fontsource/pacifico/latin-400.css";
+@import "@fontsource/fredoka/latin-700.css";
+@import "../shared/base.css";
+
+:root {
+  color-scheme: dark;
+  --font-d: "Unbounded", "Manrope", system-ui, sans-serif;
+  --font-b: "Manrope", system-ui, sans-serif;
+  --d-weight: 800; --d-track: -0.04em;
+  --bg: #0E0710; --bg-2: #1A0E1C; --surface: #1C1020;
+  --ink: #FFF1E6; --ink-2: #D2BCC8; --line: rgb(255 241 230 / .14);
+  --brand: #FF6BB0; --accent: #FF4FA3; --on-accent: #1A0710;
+  --accent-2: #FF9F1C; --on-accent-2: #1A0710;
+  --plate: #24132A; --focus: #7DD3FC;
+  --neon: #FF4FA3; --chamoy: #B3122E; --tajin: #E4572E; --grass: #3FD27A;
+  --radius: 22px; --radius-sm: 16px;
+  --shadow-1: 0 0 0 1px rgb(255 241 230 / .08), 0 14px 30px -18px rgb(0 0 0 / .9);
+  --shadow-2: 0 0 0 1px rgb(255 79 163 / .35), 0 20px 50px -20px rgb(255 79 163 / .35);
+  --map-bg: #1A0E1C; --map-ink: #FF6BB0; --map-road: #0E0710;
+  --footer-bg: #07030A; --footer-ink: #FFF1E6;
+  --order-bg: linear-gradient(135deg, #2A0B1A, #14070F); --order-ink: #FFF1E6;
+}
+body { background: var(--bg); }
+.dir-c .sec-title { font-size: clamp(32px, 6.6vw, 68px); line-height: 1; text-transform: uppercase; }
+.dir-c .sec-title::after { content: ""; display: block; width: 72px; height: 4px; margin-top: 18px; border-radius: 4px; background: var(--neon); box-shadow: 0 0 12px var(--neon), 0 0 30px rgb(255 79 163 / .6); }
+.dir-c .eyebrow { color: var(--brand); }
+.dir-c .site-header.is-scrolled { background: rgb(14 7 16 / .82); }
+.dir-c .lang__b[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.dir-c .btn { box-shadow: 0 3px 0 var(--b-edge), 0 0 0 rgb(255 79 163 / 0); }
+.dir-c .btn:hover { box-shadow: 0 5px 0 var(--b-edge), 0 0 26px -4px var(--b-bg); }
+.dir-c .btn--ghost { --b-ink: var(--ink); box-shadow: inset 0 0 0 2px var(--line); }
+.dir-c .btn--ghost:hover { box-shadow: inset 0 0 0 2px var(--neon), 0 0 22px -6px var(--neon); }
+
+/* finder + menu */
+.dir-c .antojo { background: radial-gradient(80% 60% at 85% 10%, rgb(179 18 46 / .22), transparent 70%), var(--bg); padding-bottom: 0; }
+.dir-c .chip { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px rgb(255 241 230 / .28); }
+.dir-c .chip:hover { box-shadow: inset 0 0 0 1.5px var(--neon), 0 0 18px -6px var(--neon); }
+.dir-c .chip[aria-pressed="true"] { background: var(--neon); color: #1A0710; box-shadow: 0 0 22px -4px var(--neon); }
+.dir-c .chip[data-mood="picante"][aria-pressed="true"] { background: #FF5A3C; box-shadow: 0 0 22px -4px #FF5A3C; }
+.dir-c .chip[data-mood="fruta"][aria-pressed="true"], .dir-c .chip[data-mood="nuevo"][aria-pressed="true"] { background: var(--accent-2); box-shadow: 0 0 22px -4px var(--accent-2); }
+.dir-c .machine { background: linear-gradient(180deg, #24132A, #170B19); box-shadow: 0 0 0 1px rgb(255 79 163 / .35), 0 0 60px -20px rgb(255 79 163 / .55), 0 40px 60px -30px #000; }
+.dir-c .machine__window { background: radial-gradient(60% 55% at 50% 58%, rgb(255 79 163 / .28), #170B19 72%); box-shadow: inset 0 0 0 2px rgb(255 79 163 / .55), inset 0 0 30px rgb(255 79 163 / .25); }
+.dir-c .machine__glass { background: linear-gradient(180deg, rgb(255 255 255 / .14), transparent 24%, transparent 76%, rgb(0 0 0 / .4)); }
+.dir-c .menu { margin-top: clamp(72px, 9vw, 120px); padding-bottom: clamp(56px, 8vw, 110px); }
+.dir-c .menu__bar { background: rgb(14 7 16 / .86); }
+.dir-c .search { background: #1A0E1C; }
+.dir-c .tab.is-active { background: var(--neon); color: #1A0710; box-shadow: 0 0 16px -4px var(--neon); }
+.dir-c .mgroup__head { border-bottom: 1px solid rgb(255 241 230 / .3); }
+.dir-c .mgroup__title { text-transform: uppercase; font-size: clamp(20px, 2.8vw, 30px); }
+.dir-c .mcard { background: var(--surface); }
+.dir-c .mcard:hover { box-shadow: 0 0 0 1px rgb(var(--tint, 255 79 163) / .7), 0 0 40px -12px rgb(var(--tint, 255 79 163) / .9); }
+.dir-c .mcard__media { background: radial-gradient(58% 52% at 50% 58%, rgb(var(--tint, 255 79 163) / .5), transparent 72%), #1F1124; }
+.dir-c .mcard__media img { filter: drop-shadow(0 12px 14px rgb(0 0 0 / .55)); }
+.dir-c .mcard__name { font-size: 16px; letter-spacing: -0.02em; }
+@media (min-width: 720px) { .dir-c .mcard__name { font-size: 17px; } }
+.dir-c .mcard__price { font-size: 15px; }
+.dir-c .mcard--type { --type-bg: #170B19; --type-ink: #FFF1E6; }
+.dir-c .mcard--type[data-cat="fresas"] .mcard__typename, .dir-c .mcard--type[data-cat="helado_sundaes"] .mcard__typename, .dir-c .mcard--type[data-cat="shakes_frappes"] .mcard__typename { color: #FF8CC4; text-shadow: 0 0 18px rgb(255 79 163 / .7); }
+.dir-c .mcard--type[data-cat="fruta_con_chile"] .mcard__typename, .dir-c .mcard--type[data-cat="antojitos_salados"] .mcard__typename, .dir-c .mcard--type[data-cat="esquites_elotes"] .mcard__typename { color: #FFB25C; text-shadow: 0 0 18px rgb(255 159 28 / .6); }
+.dir-c .mcard--type[data-cat="bebidas_preparadas"] .mcard__typename, .dir-c .mcard--type[data-cat="raspados"] .mcard__typename, .dir-c .mcard--type[data-cat="crepas_waffles_pancakes"] .mcard__typename { color: #7CF0AE; text-shadow: 0 0 18px rgb(63 210 122 / .55); }
+.dir-c .mcard__typename { font-size: clamp(16px, 2.2vw, 21px); text-transform: uppercase; }
+.dir-c .mcard__pm { background: #fff; }
+.dir-c .mcard__heat { color: #FF7A5C; }
+.dir-c .mcard__flag { background: var(--grass); color: #06210F; }
+.dir-c .mgroup__more { background: transparent; box-shadow: inset 0 0 0 2px var(--neon); color: var(--ink); }
+
+/* favourites */
+.dir-c .favs { background: linear-gradient(180deg, var(--bg), #160A17); }
+.dir-c .fav { background: var(--surface); }
+.dir-c .fav__media { background: radial-gradient(56% 50% at 50% 58%, rgb(var(--tint, 255 79 163) / .55), transparent 72%), #1F1124; }
+.dir-c .fav__media img { filter: drop-shadow(0 16px 18px rgb(0 0 0 / .6)); }
+.dir-c .fav__name { font-size: 22px; text-transform: uppercase; }
+.dir-c .fav__badge { background: rgb(255 241 230 / .1); color: var(--ink); }
+.dir-c .fav__badge--hot { background: var(--accent-2); color: #1A0710; }
+.dir-c .round-btn { background: transparent; color: var(--ink); }
+
+/* shop at night: the selfie wall gets the spotlight */
+.dir-c .shop { background: #0B050D; }
+.dir-c .shot { background: #000; box-shadow: 0 0 0 1px var(--line); }
+.dir-c .shot figcaption { background: rgb(14 7 16 / .78); color: var(--ink); }
+.dir-c .shot--selfie { box-shadow: 0 0 0 2px var(--grass), 0 0 40px -6px rgb(63 210 122 / .6); }
+.dir-c .shot--selfie figcaption strong { font-family: "Pacifico", cursive; font-weight: 400; color: #FF8CC4; text-shadow: 0 0 10px rgb(255 79 163 / .8); font-size: 20px; display: block; }
+.dir-c .shot--storefront { box-shadow: 0 0 0 2px var(--neon), 0 0 40px -8px rgb(255 79 163 / .7); }
+
+/* reviews: neon-sign quotes */
+.dir-c .reviews { background: var(--bg); }
+.dir-c .quote { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.dir-c .quote blockquote p { font-family: var(--font-b); font-weight: 800; font-size: clamp(19px, 2vw, 23px); }
+.dir-c .quote:nth-child(3n+1) blockquote p { color: #FF9ACB; }
+.dir-c .quote:nth-child(3n+2) blockquote p { color: #FFC07A; }
+.dir-c .quote:nth-child(3n) blockquote p { color: #9AF5C0; }
+.dir-c .stars { color: #FFC24B; text-shadow: 0 0 10px rgb(255 194 75 / .6); }
+
+/* visit */
+.dir-c .visit { background: #0B050D; }
+.dir-c .open-status { background: rgb(255 241 230 / .06); }
+.dir-c .open-status.is-open::before { background: var(--grass); box-shadow: 0 0 10px var(--grass); }
+.dir-c .services li { background: rgb(255 241 230 / .07); }
+.dir-c .services li::before { color: var(--grass); }
+.dir-c .hours tr.is-today { color: var(--brand); }
+.dir-c .badge { box-shadow: inset 0 0 0 1px var(--line); }
+.dir-c .confirm { color: #2B1E00; }
+
+/* order block */
+.dir-c .orderblock__card { background: radial-gradient(90% 120% at 100% 0%, rgb(179 18 46 / .55), transparent 60%), radial-gradient(80% 90% at 0% 100%, rgb(255 79 163 / .25), transparent 60%), #160A17; box-shadow: 0 0 0 1px rgb(255 79 163 / .35), 0 40px 80px -40px rgb(255 79 163 / .6); }
+.dir-c .orderblock .eyebrow { color: var(--brand); }
+.dir-c .orderblock .alsoon a { color: var(--ink); }
+
+/* footer + bar */
+.dir-c .site-footer { --line: rgb(255 241 230 / .12); }
+.dir-c .site-footer__brand img { background: #fff; border-radius: 50%; box-shadow: 0 0 30px -6px rgb(255 79 163 / .7); }
+.dir-c .site-footer__tag { font-family: "Pacifico", cursive; font-weight: 400; color: #FF8CC4; font-size: 22px; }
+.dir-c .mobile-bar { background: rgb(14 7 16 / .9); }
+.dir-c .mobile-bar__order { box-shadow: 0 3px 0 #8A1F55, 0 0 24px -6px var(--neon); }

@@ -1,0 +1,43 @@
+// Generates CHECKLIST.md (everything to confirm with the owner) from menu.json + test results.
+import fs from 'node:fs'; import path from 'node:path';
+const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const menu = JSON.parse(fs.readFileSync(path.join(root, 'reference/menu.json'), 'utf8'));
+const links = fs.existsSync(path.join(root, 'review/links.json')) ? JSON.parse(fs.readFileSync(path.join(root, 'review/links.json'), 'utf8')) : [];
+const items = menu.items;
+const L = [];
+L.push('# Owner checklist — La Zacatecana demo', '');
+L.push('Everything below is marked on the site as [CONFIRM WITH OWNER], left as a placeholder, or needs the owner\'s answer before launch.', '');
+L.push('## 1. Business facts and badges');
+L.push('- [ ] Google attributes shown as small badges: **"Latino-owned"** and **"LGBTQ+ friendly"** — keep them?');
+L.push('- [ ] **Leave us a Google review** link is a Maps search placeholder → replace with the direct review link from Google Business Profile (`LINKS.googleReview` in `src/shared/config.mjs`).');
+L.push('- [ ] Domain / canonical URL → then add `url`, `image`, `logo` to the schema markup (they must be absolute URLs).');
+L.push('- [ ] **Original logo files** (AI/PDF/SVG). The site uses my SVG redraws (`assets/brand/`), with Pacifico and Fredoka standing in for their lettering.');
+L.push('- [ ] Owners\' Zacatecas connection: the site uses the Zacatecas outline (it\'s in their logo) and pink-cantera styling, but makes **no** origin-story claim. If they want one, they write it. [CONFIRM: owners\' Zacatecas connection]');
+L.push('- [ ] Holiday hours / exceptions (the "Open now" pill uses Mon–Fri 12–9, Sat–Sun 11–9, America/New_York).');
+L.push('- [ ] Which "Mini Pancakes" is the DoorDash-featured one (the site uses **15 Mini Pancakes** in Los favoritos).', '');
+L.push('## 2. Prices');
+L.push('- [ ] **Confirm in-store prices.** All prices are DoorDash online prices; the site says "Online prices. In-store prices may vary."');
+L.push(`- [ ] ${items.filter((i) => i.price_usd == null).length} items have no online price and show **"Ask in store"**: ${items.filter((i) => i.price_usd == null).map((i) => i.name_es).join(', ')}.`, '');
+L.push('## 3. Copy');
+L.push('- [ ] **Owner review of all Spanish copy** — UI text (`src/shared/i18n.mjs`) and the 81 menu descriptions I translated (`src/shared/menu-es.mjs`).');
+L.push(`- [ ] **${items.filter((i) => !i.description_en).length} items have no description** (wrong DoorDash text was removed; I didn't invent new ones): ${items.filter((i) => !i.description_en).map((i) => i.name_es).join(', ')}.`);
+L.push('- [ ] Picture-menu page 4 shows ~28 items that are **not in menu.json** (e.g. Marquesitas, Ice Cream Taco, Mangos con Crema, Mega Mangonada, Mega Limonada, Matcha, Pop Tarts Shake, Pingüino Shake, Crepa Bowl, Shark Attack, Tuna combo, Cereal Sundae, add boba…). Add them?');
+L.push('- [ ] Only 3 items are tagged "para compartir" — tag more for the "Para compartir" chip?', '');
+L.push('## 4. Item notes from menu.json (`confirm_with_owner`)');
+for (const i of items.filter((x) => x.confirm_with_owner)) L.push(`- [ ] **${i.name_es}**${i.price_usd != null ? ` ($${i.price_usd.toFixed(2)})` : ''} — ${i.confirm_with_owner}`);
+L.push('');
+L.push('## 5. Ordering links (single config: `order-config.js` in each build, source `src/shared/config.mjs`)');
+L.push('Click-tested from a headless browser in this workspace (no sign-in). The built-in browser was not available.', '');
+L.push('| Link | Result | Notes |', '|---|---|---|');
+for (const l of links) {
+  const ok = l.status && l.status < 400;
+  const note = /Just a moment/.test(l.title || '') ? 'Cloudflare bot check in headless — verify by tapping it on your phone' : /login/.test(l.final || '') ? 'Redirects to login when logged out (normal)' : l.status === 429 ? 'Rate-limited in headless (normal for Instagram)' : '';
+  L.push(`| ${l.url.length > 70 ? l.url.slice(0, 67) + '…' : l.url} | ${ok ? '✅' : '⚠️'} ${l.status ?? 'error'} | ${note} |`);
+}
+L.push('', '- [ ] Per-item deep links on order.online: **unverified**, so every item\'s button opens the store. If you confirm a pattern, set `itemUrl` in `order-config.js`.', '');
+L.push('## 6. AI assets');
+L.push('- None. 0 credits spent. Local, free background removal only (see `AI_ASSETS.md`).', '');
+L.push('## 7. Photos');
+L.push('- [ ] See `PHOTOS_TODO.md` (upscale vs. reshoot list, ordered by visual impact).');
+fs.writeFileSync(path.join(root, 'CHECKLIST.md'), L.join('\n') + '\n');
+console.log('CHECKLIST.md lines', L.length);

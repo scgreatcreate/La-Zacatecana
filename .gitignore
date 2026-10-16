@@ -1,0 +1,9 @@
+node_modules/
+.venv/
+**/.dev/
+**/.shots/
+*.log
+.DS_Store
+assets/menu/.rembg-in/
+assets/menu/.pm-crops/
+review/

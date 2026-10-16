@@ -1,0 +1,380 @@
+{
+ "15-mini-pancakes": {
+  "lapVar": 145,
+  "native": [
+   447,
+   372
+  ]
+ },
+ "aguas-frescas": {
+  "lapVar": 449,
+  "native": [
+   1376,
+   768
+  ]
+ },
+ "arizona-preparado": {
+  "lapVar": 1040,
+  "native": [
+   1500,
+   2000
+  ]
+ },
+ "banana-split": {
+  "lapVar": 3662,
+  "native": [
+   378,
+   435
+  ]
+ },
+ "bionico": {
+  "lapVar": 181,
+  "native": [
+   403,
+   537
+  ]
+ },
+ "boing-preparado": {
+  "lapVar": 1514,
+  "native": [
+   312,
+   416
+  ]
+ },
+ "burrito-ice-cream": {
+  "lapVar": 1976,
+  "native": [
+   1376,
+   768
+  ]
+ },
+ "canasta-3-marias": {
+  "lapVar": 248,
+  "native": [
+   447,
+   592
+  ]
+ },
+ "carlos-v-shake": {
+  "lapVar": 3528,
+  "native": [
+   1376,
+   768
+  ]
+ },
+ "chavo-crepa": {
+  "lapVar": 326,
+  "native": [
+   447,
+   569
+  ]
+ },
+ "chicharron-preparado": {
+  "lapVar": 2451,
+  "native": [
+   1376,
+   768
+  ]
+ },
+ "concha-nieve": {
+  "lapVar": 961,
+  "native": [
+   286,
+   341
+  ]
+ },
+ "crepa-gourmet": {
+  "lapVar": 396,
+  "native": [
+   330,
+   271
+  ]
+ },
+ "crepa-rellena-de-mazapan-y-queso-crema": {
+  "lapVar": 482,
+  "native": [
+   378,
+   312
+  ]
+ },
+ "crepa-rellena": {
+  "lapVar": 3247,
+  "native": [
+   487,
+   329
+  ]
+ },
+ "crepa": {
+  "lapVar": 295,
+  "native": [
+   447,
+   424
+  ]
+ },
+ "crepaleta": {
+  "lapVar": 601,
+  "native": [
+   756,
+   1126
+  ]
+ },
+ "dubai-chocolate-strawberries": {
+  "lapVar": 1034,
+  "native": [
+   302,
+   537
+  ]
+ },
+ "elote": {
+  "lapVar": 1334,
+  "native": [
+   2000,
+   2000
+  ]
+ },
+ "esquite-con-hot-cheetos": {
+  "lapVar": 166,
+  "native": [
+   2000,
+   2000
+  ]
+ },
+ "esquite-con-takis": {
+  "lapVar": 395,
+  "native": [
+   2000,
+   2000
+  ]
+ },
+ "esquite": {
+  "lapVar": 125,
+  "native": [
+   530,
+   532
+  ]
+ },
+ "flaming-hot-crepa": {
+  "lapVar": 345,
+  "native": [
+   447,
+   571
+  ]
+ },
+ "fresa-gourmet-strawberry-gourmet": {
+  "lapVar": 47,
+  "native": [
+   480,
+   640
+  ]
+ },
+ "fresas-con-crema-y-abuelita": {
+  "lapVar": 1279,
+  "native": [
+   341,
+   510
+  ]
+ },
+ "fresas-con-crema-y-nutella": {
+  "lapVar": 54,
+  "native": [
+   1681,
+   2000
+  ]
+ },
+ "fresas-con-crema": {
+  "lapVar": 39,
+  "native": [
+   532,
+   655
+  ]
+ },
+ "fresas-congeladas": {
+  "lapVar": 999,
+  "native": [
+   265,
+   423
+  ]
+ },
+ "gansito-shake": {
+  "lapVar": 40,
+  "native": [
+   597,
+   597
+  ]
+ },
+ "helado": {
+  "lapVar": 100,
+  "native": [
+   447,
+   599
+  ]
+ },
+ "la-tusa": {
+  "lapVar": 470,
+  "native": [
+   403,
+   537
+  ]
+ },
+ "malteada-de-nugs": {
+  "lapVar": 4289,
+  "native": [
+   1376,
+   768
+  ]
+ },
+ "mangonada": {
+  "lapVar": 91,
+  "native": [
+   2000,
+   2000
+  ]
+ },
+ "manzana-loca": {
+  "lapVar": 1026,
+  "native": [
+   477,
+   484
+  ]
+ },
+ "mazapan-shake": {
+  "lapVar": 93,
+  "native": [
+   624,
+   624
+  ]
+ },
+ "mega-smoothie": {
+  "lapVar": 2901,
+  "native": [
+   1376,
+   768
+  ]
+ },
+ "minejarrito": {
+  "lapVar": 2691,
+  "native": [
+   1376,
+   768
+  ]
+ },
+ "mini-pancakes-gourmet": {
+  "lapVar": 944,
+  "native": [
+   282,
+   258
+  ]
+ },
+ "monster-loco": {
+  "lapVar": 3604,
+  "native": [
+   1376,
+   768
+  ]
+ },
+ "pancakes": {
+  "lapVar": 2941,
+  "native": [
+   1376,
+   768
+  ]
+ },
+ "pepino-split": {
+  "lapVar": 324,
+  "native": [
+   435,
+   267
+  ]
+ },
+ "pina-loca": {
+  "lapVar": 610,
+  "native": [
+   414,
+   672
+  ]
+ },
+ "rame-esquite": {
+  "lapVar": 577,
+  "native": [
+   1533,
+   2000
+  ]
+ },
+ "sandifresa": {
+  "lapVar": 85,
+  "native": [
+   1500,
+   2000
+  ]
+ },
+ "sincronizada": {
+  "lapVar": 245,
+  "native": [
+   447,
+   551
+  ]
+ },
+ "sponch-fresas-c-crema": {
+  "lapVar": 113,
+  "native": [
+   720,
+   1096
+  ]
+ },
+ "sponch-shake": {
+  "lapVar": 113,
+  "native": [
+   720,
+   1096
+  ]
+ },
+ "torta-del-chavo": {
+  "lapVar": 674,
+  "native": [
+   504,
+   510
+  ]
+ },
+ "vaquita-loca": {
+  "lapVar": 877,
+  "native": [
+   446,
+   555
+  ]
+ },
+ "waffle-con-helado": {
+  "lapVar": 368,
+  "native": [
+   447,
+   580
+  ]
+ },
+ "waffle-de-burbuja": {
+  "lapVar": 304,
+  "native": [
+   1295,
+   2000
+  ]
+ },
+ "waffle-gourmet": {
+  "lapVar": 2475,
+  "native": [
+   340,
+   514
+  ]
+ },
+ "waffle-simple": {
+  "lapVar": 198,
+  "native": [
+   348,
+   520
+  ]
+ },
+ "yogur-con-fresas": {
+  "lapVar": 125,
+  "native": [
+   447,
+   481
+  ]
+ }
+}

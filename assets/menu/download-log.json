@@ -1,0 +1,542 @@
+[
+ {
+  "index": 0,
+  "name_es": "Dubai chocolate strawberries",
+  "slug": "dubai-chocolate-strawberries",
+  "file": "assets/menu/raw/dubai-chocolate-strawberries.png",
+  "ok": true,
+  "bytes": 259614,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/fe6cb0b2-9c86-43aa-bc35-9c412df12758-retina-large.png"
+ },
+ {
+  "index": 1,
+  "name_es": "Aguas Frescas",
+  "slug": "aguas-frescas",
+  "file": "assets/menu/raw/aguas-frescas.jpeg",
+  "ok": true,
+  "bytes": 74196,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/8283a617-15f9-4c39-8c1e-b64a7cf28b95-retina-large.jpeg"
+ },
+ {
+  "index": 2,
+  "name_es": "Crepa Rellena",
+  "slug": "crepa-rellena",
+  "file": "assets/menu/raw/crepa-rellena.png",
+  "ok": true,
+  "bytes": 327668,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/f1dfe6b0-4fab-4830-b358-fa3a4473101d-retina-large.png"
+ },
+ {
+  "index": 3,
+  "name_es": "15 Mini Pancakes",
+  "slug": "15-mini-pancakes",
+  "file": "assets/menu/raw/15-mini-pancakes.png",
+  "ok": true,
+  "bytes": 338265,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/42c80e74-67a0-4fd4-9653-8b333de2da7f-retina-large.png"
+ },
+ {
+  "index": 4,
+  "name_es": "Esquite",
+  "slug": "esquite",
+  "file": "assets/menu/raw/esquite.jpg",
+  "ok": true,
+  "bytes": 503067,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/ugc/88629a55-b083-449b-9ead-dc7a689d70b5-57047259-2dad-4b86-9f8e-22864e4c6135.jpg"
+ },
+ {
+  "index": 5,
+  "name_es": "Mini Pancakes Gourmet",
+  "slug": "mini-pancakes-gourmet",
+  "file": "assets/menu/raw/mini-pancakes-gourmet.png",
+  "ok": true,
+  "bytes": 206644,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/be4e9b0a-3e5d-458d-818f-acea72b163e3-retina-large.png"
+ },
+ {
+  "index": 6,
+  "name_es": "Mangonada",
+  "slug": "mangonada",
+  "file": "assets/menu/raw/mangonada.png",
+  "ok": true,
+  "bytes": 4079347,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/ugc/6da252a4-795d-48e1-973d-4c95c7735356.png"
+ },
+ {
+  "index": 7,
+  "name_es": "Manzana Loca",
+  "slug": "manzana-loca",
+  "file": "assets/menu/raw/manzana-loca.png",
+  "ok": true,
+  "bytes": 616002,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/915015ee-1377-47ee-82be-6f82f8b2c34e-retina-large.png"
+ },
+ {
+  "index": 8,
+  "name_es": "Esquite con Hot Cheetos",
+  "slug": "esquite-con-hot-cheetos",
+  "file": "assets/menu/raw/esquite-con-hot-cheetos.png",
+  "ok": true,
+  "bytes": 5201985,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/ugc/0c3a2f2f-a81c-4650-a57e-13b8c3bf274c.png"
+ },
+ {
+  "index": 9,
+  "name_es": "Fresas con Crema",
+  "slug": "fresas-con-crema",
+  "file": "assets/menu/raw/fresas-con-crema.jpg",
+  "ok": true,
+  "bytes": 207457,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/a457dfdc-ab2a-429a-8dac-c4737b930a36-9ad18c89-221e-430f-8095-5f3a8208f5b6-retina-large.jpg"
+ },
+ {
+  "index": 10,
+  "name_es": "Fresas Congeladas",
+  "slug": "fresas-congeladas",
+  "file": "assets/menu/raw/fresas-congeladas.png",
+  "ok": true,
+  "bytes": 174677,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/c1c40240-cb59-4710-81dc-146ee96c3379-retina-large.png"
+ },
+ {
+  "index": 11,
+  "name_es": "Fresas con crema y Nutella",
+  "slug": "fresas-con-crema-y-nutella",
+  "file": "assets/menu/raw/fresas-con-crema-y-nutella.png",
+  "ok": true,
+  "bytes": 2708798,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/984cc32f-61bb-4b68-9063-5ea78238c45d-retina-large.png"
+ },
+ {
+  "index": 12,
+  "name_es": "Yogur con Fresas",
+  "slug": "yogur-con-fresas",
+  "file": "assets/menu/raw/yogur-con-fresas.png",
+  "ok": true,
+  "bytes": 307219,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/a75af77b-0808-4a8f-b578-77e816723486-retina-large.png"
+ },
+ {
+  "index": 13,
+  "name_es": "Fresa Gourmet /Strawberry Gourmet",
+  "slug": "fresa-gourmet-strawberry-gourmet",
+  "file": "assets/menu/raw/fresa-gourmet-strawberry-gourmet.jpg",
+  "ok": true,
+  "bytes": 386592,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/9b951adc-3fcb-4a0a-8273-80acee16e93e-5bcaf8af-35dc-493e-9107-0d44345c2b25-retina-large.jpg"
+ },
+ {
+  "index": 14,
+  "name_es": "Helado",
+  "slug": "helado",
+  "file": "assets/menu/raw/helado.png",
+  "ok": true,
+  "bytes": 208236,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/715b2756-21a5-4f0a-9d34-8e3723d7e57a-retina-large.png"
+ },
+ {
+  "index": 15,
+  "name_es": "Chavo Crepa",
+  "slug": "chavo-crepa",
+  "file": "assets/menu/raw/chavo-crepa.png",
+  "ok": true,
+  "bytes": 270057,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/5517ca15-4d9f-435e-b512-832a9a86ae05-retina-large.png"
+ },
+ {
+  "index": 16,
+  "name_es": "Flaming Hot Crepa",
+  "slug": "flaming-hot-crepa",
+  "file": "assets/menu/raw/flaming-hot-crepa.png",
+  "ok": true,
+  "bytes": 267165,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/ba98226e-c82c-46d4-be62-87070a85a795-retina-large.png"
+ },
+ {
+  "index": 17,
+  "name_es": "Crepa",
+  "slug": "crepa",
+  "file": "assets/menu/raw/crepa.png",
+  "ok": true,
+  "bytes": 193490,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/a63de170-bb51-407c-9665-4560ccfeeb49-retina-large.png"
+ },
+ {
+  "index": 18,
+  "name_es": "Canasta 3 Marías",
+  "slug": "canasta-3-marias",
+  "file": "assets/menu/raw/canasta-3-marias.png",
+  "ok": true,
+  "bytes": 278017,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/2208a2cc-d72e-4ed1-83a9-6c4194a49b51-retina-large.png"
+ },
+ {
+  "index": 19,
+  "name_es": "Burrito Ice Cream",
+  "slug": "burrito-ice-cream",
+  "file": "assets/menu/raw/burrito-ice-cream.jpeg",
+  "ok": true,
+  "bytes": 94807,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/c68893d4-d309-42d0-ae54-cc083a98c6f5-retina-large.jpeg"
+ },
+ {
+  "index": 20,
+  "name_es": "Waffle con Helado",
+  "slug": "waffle-con-helado",
+  "file": "assets/menu/raw/waffle-con-helado.png",
+  "ok": true,
+  "bytes": 310381,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/64b2bd32-9ab4-4a75-80f6-68d7f8bda8d9-retina-large.png"
+ },
+ {
+  "index": 21,
+  "name_es": "Crepa Gourmet",
+  "slug": "crepa-gourmet",
+  "file": "assets/menu/raw/crepa-gourmet.png",
+  "ok": true,
+  "bytes": 183730,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/4bec76fb-3c9b-43cd-92f5-f1a773c6a9a7-retina-large.png"
+ },
+ {
+  "index": 22,
+  "name_es": "Gansito-Shake",
+  "slug": "gansito-shake",
+  "file": "assets/menu/raw/gansito-shake.jpg",
+  "ok": true,
+  "bytes": 312448,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/069614c6-0ee2-4528-b106-fd71d1a70cb0-966a9aa5-f1b4-4309-a3fd-36d5dc2537ca-retina-large.jpg"
+ },
+ {
+  "index": 23,
+  "name_es": "Mazapan-Shake",
+  "slug": "mazapan-shake",
+  "file": "assets/menu/raw/mazapan-shake.jpg",
+  "ok": true,
+  "bytes": 276651,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/2aaba98f-415c-4e34-b4bd-5a9ffd226088-87f5a92d-2189-41af-9168-ec53103c5d67-retina-large.jpg"
+ },
+ {
+  "index": 24,
+  "name_es": "Concha Nieve",
+  "slug": "concha-nieve",
+  "file": "assets/menu/raw/concha-nieve.png",
+  "ok": true,
+  "bytes": 193610,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/debc221a-6018-45de-8b37-eab0bbf3c7d6-retina-large.png"
+ },
+ {
+  "index": 25,
+  "name_es": "Sandifresa",
+  "slug": "sandifresa",
+  "file": "assets/menu/raw/sandifresa.png",
+  "ok": true,
+  "bytes": 2384872,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/26fbfe00-f890-44af-a36b-d029819ee422-retina-large.png"
+ },
+ {
+  "index": 27,
+  "name_es": "Carlos V Shake",
+  "slug": "carlos-v-shake",
+  "file": "assets/menu/raw/carlos-v-shake.jpeg",
+  "ok": true,
+  "bytes": 69786,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/137759ad-3d42-4ccf-9857-6b5ec979849c-retina-large.jpeg"
+ },
+ {
+  "index": 28,
+  "name_es": "Mega Smoothie",
+  "slug": "mega-smoothie",
+  "file": "assets/menu/raw/mega-smoothie.jpeg",
+  "ok": true,
+  "bytes": 62664,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/1558b248-1ecc-4293-a8ac-46b6663f3e2a-retina-large.jpeg"
+ },
+ {
+  "index": 29,
+  "name_es": "Boing Preparado",
+  "slug": "boing-preparado",
+  "file": "assets/menu/raw/boing-preparado.png",
+  "ok": true,
+  "bytes": 324545,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/5c4e12d5-c640-4182-b61e-582f19755894-retina-large.png"
+ },
+ {
+  "index": 30,
+  "name_es": "Pepino-Split",
+  "slug": "pepino-split",
+  "file": "assets/menu/raw/pepino-split.png",
+  "ok": true,
+  "bytes": 278788,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/3df77a2e-a91c-497f-804c-26552848ca1a-retina-large.png"
+ },
+ {
+  "index": 31,
+  "name_es": "Banana-Split",
+  "slug": "banana-split",
+  "file": "assets/menu/raw/banana-split.png",
+  "ok": true,
+  "bytes": 285535,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/f6258b28-ad43-48fa-8583-c1931a2393e9-retina-large.png"
+ },
+ {
+  "index": 32,
+  "name_es": "Rame-esquite",
+  "slug": "rame-esquite",
+  "file": "assets/menu/raw/rame-esquite.png",
+  "ok": true,
+  "bytes": 3258951,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/3b9ae485-872a-4a1a-887f-e97b488a21fe-retina-large.png"
+ },
+ {
+  "index": 37,
+  "name_es": "Elote",
+  "slug": "elote",
+  "file": "assets/menu/raw/elote.jpg",
+  "ok": true,
+  "bytes": 1375905,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/ugc/4b320fab-e785-4ff6-b70f-13fa029e4f9d.jpg"
+ },
+ {
+  "index": 40,
+  "name_es": "Monster Loco",
+  "slug": "monster-loco",
+  "file": "assets/menu/raw/monster-loco.jpeg",
+  "ok": true,
+  "bytes": 105609,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/bdaca686-3ab9-4375-b9b7-3a3c2d216784-retina-large.jpeg"
+ },
+ {
+  "index": 42,
+  "name_es": "Arizona Preparado",
+  "slug": "arizona-preparado",
+  "file": "assets/menu/raw/arizona-preparado.png",
+  "ok": true,
+  "bytes": 3744624,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/bf329764-52c9-4195-81ec-d705137f6b23-retina-large.png"
+ },
+ {
+  "index": 44,
+  "name_es": "Waffle de Burbuja",
+  "slug": "waffle-de-burbuja",
+  "file": "assets/menu/raw/waffle-de-burbuja.png",
+  "ok": true,
+  "bytes": 3756873,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/be54f97a-5c9a-42f7-9487-88c9fdc355a3-retina-large.png"
+ },
+ {
+  "index": 45,
+  "name_es": "Malteada de Nugs",
+  "slug": "malteada-de-nugs",
+  "file": "assets/menu/raw/malteada-de-nugs.jpeg",
+  "ok": true,
+  "bytes": 71479,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/568cb3fe-fb1a-482a-9266-558adc0e8481-retina-large.jpeg"
+ },
+ {
+  "index": 50,
+  "name_es": "Biónico",
+  "slug": "bionico",
+  "file": "assets/menu/raw/bionico.png",
+  "ok": true,
+  "bytes": 396350,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/51453708-657b-4b31-ac6a-b2ae3a4145be-retina-large.png"
+ },
+ {
+  "index": 58,
+  "name_es": "Chicharrón Preparado",
+  "slug": "chicharron-preparado",
+  "file": "assets/menu/raw/chicharron-preparado.jpg",
+  "ok": true,
+  "bytes": 191543,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/ugc/df66ae4d-dda9-4592-8ffc-5d5482452309.jpg"
+ },
+ {
+  "index": 60,
+  "name_es": "Waffle Gourmet",
+  "slug": "waffle-gourmet",
+  "file": "assets/menu/raw/waffle-gourmet.png",
+  "ok": true,
+  "bytes": 418911,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/8d7d339c-3d22-4071-9c7b-b236d639b46e-retina-large.png"
+ },
+ {
+  "index": 61,
+  "name_es": "Torta del Chavo",
+  "slug": "torta-del-chavo",
+  "file": "assets/menu/raw/torta-del-chavo.png",
+  "ok": true,
+  "bytes": 461299,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/81ca9627-18c1-4dbe-b7aa-c56364cff884-retina-large.png"
+ },
+ {
+  "index": 65,
+  "name_es": "Sincronizada",
+  "slug": "sincronizada",
+  "file": "assets/menu/raw/sincronizada.png",
+  "ok": true,
+  "bytes": 334363,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/9eb04fa5-6463-4e48-aa70-b8b066378bbd-retina-large.png"
+ },
+ {
+  "index": 71,
+  "name_es": "Minejarrito",
+  "slug": "minejarrito",
+  "file": "assets/menu/raw/minejarrito.jpeg",
+  "ok": true,
+  "bytes": 73042,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/419a0e9a-6685-4a99-9ec1-5e55787a85b5-retina-large.jpeg"
+ },
+ {
+  "index": 75,
+  "name_es": "Sponch-Shake",
+  "slug": "sponch-shake",
+  "file": "assets/menu/raw/sponch-shake.jpg",
+  "ok": true,
+  "bytes": 61202,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/742f7067-bf67-4001-a711-ad3c88a0f7f3-retina-large.jpg"
+ },
+ {
+  "index": 80,
+  "name_es": "Esquite con Takis",
+  "slug": "esquite-con-takis",
+  "file": "assets/menu/raw/esquite-con-takis.jpg",
+  "ok": true,
+  "bytes": 782740,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/ugc/0c0e0fef-49ac-4b81-9818-e718cae25b0a.jpg"
+ },
+ {
+  "index": 81,
+  "name_es": "La Tusa",
+  "slug": "la-tusa",
+  "file": "assets/menu/raw/la-tusa.png",
+  "ok": true,
+  "bytes": 399423,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/95c24ece-fff4-4a54-a357-66f548fa3c89-retina-large.png"
+ },
+ {
+  "index": 82,
+  "name_es": "Piña Loca",
+  "slug": "pina-loca",
+  "file": "assets/menu/raw/pina-loca.png",
+  "ok": true,
+  "bytes": 640714,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/7d34c805-73f9-4e2c-b4ae-49b992bd7a1a-retina-large.png"
+ },
+ {
+  "index": 83,
+  "name_es": "Vaquita Loca",
+  "slug": "vaquita-loca",
+  "file": "assets/menu/raw/vaquita-loca.png",
+  "ok": true,
+  "bytes": 421615,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/82861a27-f291-4c27-9448-097fe03f4f76-retina-large.png"
+ },
+ {
+  "index": 84,
+  "name_es": "Fresas con Crema y Abuelita",
+  "slug": "fresas-con-crema-y-abuelita",
+  "file": "assets/menu/raw/fresas-con-crema-y-abuelita.png",
+  "ok": true,
+  "bytes": 289330,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/6094410c-eb1d-4485-be93-9f499fdf84c3-retina-large.png"
+ },
+ {
+  "index": 85,
+  "name_es": "Pancakes",
+  "slug": "pancakes",
+  "file": "assets/menu/raw/pancakes.jpeg",
+  "ok": true,
+  "bytes": 135031,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/04b794ae-5e54-468d-b19d-8977bc940c7a-retina-large.jpeg"
+ },
+ {
+  "index": 86,
+  "name_es": "Waffle Simple",
+  "slug": "waffle-simple",
+  "file": "assets/menu/raw/waffle-simple.png",
+  "ok": true,
+  "bytes": 405001,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/8253ed03-b06e-4ba2-b211-c4a9bb9b6dc0-retina-large.png"
+ },
+ {
+  "index": 88,
+  "name_es": "Crepa Rellena de Mazapán y Queso Crema",
+  "slug": "crepa-rellena-de-mazapan-y-queso-crema",
+  "file": "assets/menu/raw/crepa-rellena-de-mazapan-y-queso-crema.png",
+  "ok": true,
+  "bytes": 275330,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/6d093684-ae4a-457f-b4e5-fbb6f7e56620-retina-large.png"
+ },
+ {
+  "index": 92,
+  "name_es": "Crepaleta",
+  "slug": "crepaleta",
+  "file": "assets/menu/raw/crepaleta.jpg",
+  "ok": true,
+  "bytes": 106692,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/435058f5-5ccf-47cc-85f2-1958eeb4cf7b-retina-large.jpg"
+ },
+ {
+  "index": 93,
+  "name_es": "Sponch fresas c/crema",
+  "slug": "sponch-fresas-c-crema",
+  "file": "assets/menu/raw/sponch-fresas-c-crema.jpg",
+  "ok": true,
+  "bytes": 61202,
+  "err": null,
+  "url": "https://doordash-static.s3.amazonaws.com/media/photosV2/742f7067-bf67-4001-a711-ad3c88a0f7f3-retina-large.jpg"
+ }
+]

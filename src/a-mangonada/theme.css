@@ -1,0 +1,99 @@
+/* Direction A — "La Mangonada, Desarmada": daylight pastel product studio.
+   Weighting: pastel strawberry pink + cream lead, hot magenta for action, sunflower as the spark. */
+@import "@fontsource/bricolage-grotesque/latin-600.css";
+@import "@fontsource/bricolage-grotesque/latin-800.css";
+@import "@fontsource/dm-sans/latin-400.css";
+@import "@fontsource/dm-sans/latin-500.css";
+@import "@fontsource/dm-sans/latin-700.css";
+@import "@fontsource/fredoka/latin-700.css";
+@import "../shared/base.css";
+
+:root {
+  --font-d: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
+  --font-b: "DM Sans", system-ui, sans-serif;
+  --d-weight: 800; --d-track: -0.035em;
+  --bg: #FFF8EE; --bg-2: #FBE9EE; --surface: #FFFFFF;
+  --ink: #3A1424; --ink-2: #6B4655; --line: rgb(58 20 36 / .14);
+  --brand: #B0154F; --accent: #C2185B; --on-accent: #FFFFFF;
+  --accent-2: #F7C815; --on-accent-2: #3A1424;
+  --plate: #FCE3E9; --focus: #1D4ED8;
+  --radius: 28px; --radius-sm: 20px;
+  --shadow-1: 0 1px 2px rgb(58 20 36 / .06), 0 10px 24px -14px rgb(150 40 80 / .35);
+  --shadow-2: 0 2px 4px rgb(58 20 36 / .06), 0 26px 50px -22px rgb(150 40 80 / .45);
+  --map-bg: #FCE3E9; --map-ink: #B0154F;
+  --footer-bg: #3A1424; --footer-ink: #FFF1E6;
+  --order-bg: #C2185B; --order-ink: #FFF8EE;
+}
+body { background: var(--bg); }
+
+/* numbered hairline labels — the exploded-view callout language carried into the page */
+.dir-a main { counter-reset: sec; }
+.dir-a .sec-head .eyebrow { color: var(--ink); letter-spacing: .16em; }
+.dir-a .sec-head .eyebrow::before { counter-increment: sec; content: counter(sec, decimal-leading-zero); color: var(--brand); font-variant-numeric: tabular-nums; }
+.dir-a .sec-head .eyebrow::after { content: ""; width: 56px; height: 1px; background: currentColor; opacity: .5; }
+.dir-a .sec-title { font-size: clamp(38px, 8vw, 84px); line-height: .96; }
+
+/* header */
+.dir-a .site-header.is-scrolled { background: rgb(255 248 238 / .88); }
+.dir-a .lang__b[aria-pressed="true"] { background: var(--ink); color: #FFF8EE; }
+
+/* favourites — big pastel plates, sunflower sun behind */
+.dir-a .favs { background: linear-gradient(180deg, var(--bg) 0, var(--bg-2) 100%); }
+.dir-a .fav { border-radius: 30px; }
+.dir-a .fav__media { background: radial-gradient(56% 50% at 50% 58%, rgb(var(--tint, 240 180 190) / .42), transparent 72%), radial-gradient(circle at 78% 20%, #FFE58A 0 12%, transparent 13%), #FDEDF1; }
+.dir-a .fav__badge--hot { background: var(--accent-2); color: var(--on-accent-2); }
+.dir-a .fav__name { font-size: 28px; }
+
+/* finder */
+.dir-a .antojo { background: var(--bg-2); padding-bottom: 0; }
+.dir-a .finder__copy .sec-title { font-size: clamp(44px, 9vw, 96px); }
+.dir-a .chip[aria-pressed="true"] { background: var(--accent); color: #fff; box-shadow: 0 3px 0 #7A0F38; }
+.dir-a .machine { background: #fff; border: 1px solid var(--line); }
+.dir-a .machine::before { content: ""; position: absolute; inset: -14px -14px auto auto; width: 74px; height: 74px; border-radius: 50%; background: var(--accent-2); z-index: -1; }
+.dir-a .machine__window { background: radial-gradient(60% 55% at 50% 58%, #FFD1DD, #FCE3E9 70%); }
+.dir-a .menu { background: var(--bg); margin-top: clamp(72px, 9vw, 120px); padding-top: clamp(56px, 7vw, 96px); padding-bottom: clamp(56px, 8vw, 110px); border-radius: 44px 44px 0 0; }
+.dir-a .menu__bar { background: rgb(255 248 238 / .9); }
+.dir-a .mcard { border-radius: 22px; box-shadow: 0 0 0 1px var(--line); }
+.dir-a .mcard:hover { box-shadow: 0 0 0 1px var(--line), var(--shadow-2); }
+.dir-a .mcard__media { background: radial-gradient(58% 52% at 50% 58%, rgb(var(--tint, 240 180 190) / .36), transparent 72%), #FDEDF1; }
+.dir-a .mcard--type[data-cat="fresas"], .dir-a .mcard--type[data-cat="helado_sundaes"] { --type-bg: #FBD5DF; }
+.dir-a .mcard--type[data-cat="fruta_con_chile"], .dir-a .mcard--type[data-cat="raspados"] { --type-bg: #FFE3B8; }
+.dir-a .mcard--type[data-cat="esquites_elotes"], .dir-a .mcard--type[data-cat="antojitos_salados"] { --type-bg: #FFF0A8; }
+.dir-a .mcard--type[data-cat="crepas_waffles_pancakes"], .dir-a .mcard--type[data-cat="shakes_frappes"] { --type-bg: #F6E1D0; }
+.dir-a .mcard--type[data-cat="bebidas_preparadas"] { --type-bg: #DDF1E3; }
+.dir-a .mcard__typename { font-size: clamp(20px, 2.8vw, 28px); }
+.dir-a .mgroup__head { border-bottom: 1px solid var(--ink); }
+.dir-a .tab.is-active { background: var(--accent); color: #fff; }
+
+/* shop — postcards, slightly tilted, on pink */
+.dir-a .shop { background: var(--bg); }
+.dir-a .shot { border-radius: 26px; border: 8px solid #fff; box-shadow: var(--shadow-2); }
+.dir-a .shot figcaption { background: #fff; }
+@media (min-width: 900px) {
+  .dir-a .shot--storefront { rotate: 1.5deg; }
+  .dir-a .shot--selfie { rotate: -1.5deg; }
+}
+
+/* reviews — pastel speech bubbles */
+.dir-a .reviews { background: var(--bg-2); }
+.dir-a .quote { border-radius: 28px 28px 28px 6px; }
+.dir-a .quote:nth-child(3n+2) { background: #FFF6CF; }
+.dir-a .quote:nth-child(3n) { background: #FFE1E9; }
+
+/* visit */
+.dir-a .visit { background: var(--bg); }
+.dir-a .open-status { background: #fff; box-shadow: 0 0 0 1px var(--line); }
+.dir-a .services li { background: #FCE3E9; }
+
+/* order block: magenta card, cream + sunflower buttons */
+.dir-a .orderblock__card { background: radial-gradient(120% 90% at 100% 0%, #E0457F 0, transparent 55%), var(--order-bg); }
+.dir-a .orderblock .eyebrow { color: #FFE58A; }
+.dir-a .orderblock .bigcta { --b-bg: #FFF8EE; --b-ink: #3A1424; --b-edge: #D9A7B6; }
+.dir-a .orderblock .bigcta--alt { --b-bg: #F7C815; --b-ink: #3A1424; --b-edge: #B48E00; }
+.dir-a .orderblock .alsoon a { color: #FFF8EE; }
+
+/* footer */
+.dir-a .site-footer { --line: rgb(255 241 230 / .2); }
+.dir-a .site-footer .btn--ghost { box-shadow: inset 0 0 0 2px rgb(255 241 230 / .5); }
+.dir-a .site-footer .site-footer__brand img { background: #fff; border-radius: 50%; }
+.dir-a .site-footer__fine { border-top-color: rgb(255 241 230 / .2); }

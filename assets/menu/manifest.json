@@ -1,0 +1,780 @@
+{
+ "15-mini-pancakes": {
+  "side": 429,
+  "product": [
+   369,
+   329
+  ],
+  "widths": [
+   240,
+   360,
+   429
+  ],
+  "sharpUpTo": 214
+ },
+ "aguas-frescas": {
+  "side": 1272,
+  "product": [
+   1094,
+   667
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 636
+ },
+ "arizona-preparado": {
+  "side": 1951,
+  "product": [
+   1500,
+   1678
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 975
+ },
+ "banana-split": {
+  "side": 438,
+  "product": [
+   376,
+   377
+  ],
+  "widths": [
+   240,
+   360,
+   438
+  ],
+  "sharpUpTo": 219
+ },
+ "bionico": {
+  "side": 463,
+  "product": [
+   398,
+   363
+  ],
+  "widths": [
+   240,
+   360,
+   463
+  ],
+  "sharpUpTo": 231
+ },
+ "boing-preparado": {
+  "side": 387,
+  "product": [
+   274,
+   333
+  ],
+  "widths": [
+   240,
+   360,
+   387
+  ],
+  "sharpUpTo": 193
+ },
+ "burrito-ice-cream": {
+  "side": 1064,
+  "product": [
+   915,
+   526
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 532
+ },
+ "canasta-3-marias": {
+  "side": 465,
+  "product": [
+   400,
+   295
+  ],
+  "widths": [
+   240,
+   360,
+   465
+  ],
+  "sharpUpTo": 232
+ },
+ "carlos-v-shake": {
+  "side": 769,
+  "product": [
+   579,
+   661
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   769
+  ],
+  "sharpUpTo": 384
+ },
+ "chavo-crepa": {
+  "side": 514,
+  "product": [
+   442,
+   312
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   514
+  ],
+  "sharpUpTo": 257
+ },
+ "chicharron-preparado": {
+  "side": 1451,
+  "product": [
+   1248,
+   737
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 725
+ },
+ "concha-nieve": {
+  "side": 336,
+  "product": [
+   248,
+   289
+  ],
+  "widths": [
+   240,
+   336
+  ],
+  "sharpUpTo": 168
+ },
+ "crepa-gourmet": {
+  "side": 364,
+  "product": [
+   313,
+   219
+  ],
+  "widths": [
+   240,
+   360,
+   364
+  ],
+  "sharpUpTo": 182
+ },
+ "crepa-rellena-de-mazapan-y-queso-crema": {
+  "side": 393,
+  "product": [
+   338,
+   238
+  ],
+  "widths": [
+   240,
+   360,
+   393
+  ],
+  "sharpUpTo": 196
+ },
+ "crepa-rellena": {
+  "side": 472,
+  "product": [
+   406,
+   156
+  ],
+  "widths": [
+   240,
+   360,
+   472
+  ],
+  "sharpUpTo": 236
+ },
+ "crepa": {
+  "side": 483,
+  "product": [
+   415,
+   260
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   483
+  ],
+  "sharpUpTo": 241
+ },
+ "crepaleta": {
+  "side": 1170,
+  "product": [
+   728,
+   1006
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 585
+ },
+ "dubai-chocolate-strawberries": {
+  "side": 467,
+  "product": [
+   262,
+   402
+  ],
+  "widths": [
+   240,
+   360,
+   467
+  ],
+  "sharpUpTo": 233
+ },
+ "elote": {
+  "side": 2193,
+  "product": [
+   1238,
+   1886
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 1096
+ },
+ "esquite-con-hot-cheetos": {
+  "side": 2326,
+  "product": [
+   1974,
+   2000
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 1163
+ },
+ "esquite-con-takis": {
+  "side": 1294,
+  "product": [
+   1113,
+   1051
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 647
+ },
+ "esquite": {
+  "side": 619,
+  "product": [
+   510,
+   532
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   619
+  ],
+  "sharpUpTo": 309
+ },
+ "flaming-hot-crepa": {
+  "side": 479,
+  "product": [
+   412,
+   227
+  ],
+  "widths": [
+   240,
+   360,
+   479
+  ],
+  "sharpUpTo": 239
+ },
+ "fresa-gourmet-strawberry-gourmet": {
+  "side": 521,
+  "product": [
+   283,
+   448
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   521
+  ],
+  "sharpUpTo": 260
+ },
+ "fresas-con-crema-y-abuelita": {
+  "side": 374,
+  "product": [
+   322,
+   307
+  ],
+  "widths": [
+   240,
+   360,
+   374
+  ],
+  "sharpUpTo": 187
+ },
+ "fresas-con-crema-y-nutella": {
+  "side": 1955,
+  "product": [
+   1681,
+   1377
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 977
+ },
+ "fresas-con-crema": {
+  "side": 615,
+  "product": [
+   350,
+   529
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   615
+  ],
+  "sharpUpTo": 307
+ },
+ "fresas-congeladas": {
+  "side": 417,
+  "product": [
+   147,
+   359
+  ],
+  "widths": [
+   240,
+   360,
+   417
+  ],
+  "sharpUpTo": 208
+ },
+ "gansito-shake": {
+  "side": 694,
+  "product": [
+   399,
+   597
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   694
+  ],
+  "sharpUpTo": 347
+ },
+ "helado": {
+  "side": 538,
+  "product": [
+   245,
+   463
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   538
+  ],
+  "sharpUpTo": 269
+ },
+ "la-tusa": {
+  "side": 462,
+  "product": [
+   287,
+   397
+  ],
+  "widths": [
+   240,
+   360,
+   462
+  ],
+  "sharpUpTo": 231
+ },
+ "malteada-de-nugs": {
+  "side": 866,
+  "product": [
+   457,
+   745
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   866
+  ],
+  "sharpUpTo": 433
+ },
+ "mangonada": {
+  "side": 2326,
+  "product": [
+   1534,
+   2000
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 1163
+ },
+ "manzana-loca": {
+  "side": 530,
+  "product": [
+   456,
+   378
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   530
+  ],
+  "sharpUpTo": 265
+ },
+ "mazapan-shake": {
+  "side": 644,
+  "product": [
+   407,
+   554
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   644
+  ],
+  "sharpUpTo": 322
+ },
+ "mega-smoothie": {
+  "side": 833,
+  "product": [
+   344,
+   716
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   833
+  ],
+  "sharpUpTo": 416
+ },
+ "minejarrito": {
+  "side": 793,
+  "product": [
+   639,
+   682
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   793
+  ],
+  "sharpUpTo": 396
+ },
+ "mini-pancakes-gourmet": {
+  "side": 306,
+  "product": [
+   263,
+   206
+  ],
+  "widths": [
+   240,
+   306
+  ],
+  "sharpUpTo": 153
+ },
+ "monster-loco": {
+  "side": 901,
+  "product": [
+   775,
+   641
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   901
+  ],
+  "sharpUpTo": 450
+ },
+ "pancakes": {
+  "side": 1074,
+  "product": [
+   924,
+   690
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 537
+ },
+ "pepino-split": {
+  "side": 455,
+  "product": [
+   391,
+   169
+  ],
+  "widths": [
+   240,
+   360,
+   455
+  ],
+  "sharpUpTo": 227
+ },
+ "pina-loca": {
+  "side": 752,
+  "product": [
+   414,
+   647
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   752
+  ],
+  "sharpUpTo": 376
+ },
+ "rame-esquite": {
+  "side": 1912,
+  "product": [
+   1533,
+   1644
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 956
+ },
+ "sandifresa": {
+  "side": 2326,
+  "product": [
+   1087,
+   2000
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 1163
+ },
+ "sincronizada": {
+  "side": 453,
+  "product": [
+   353,
+   390
+  ],
+  "widths": [
+   240,
+   360,
+   453
+  ],
+  "sharpUpTo": 226
+ },
+ "sponch-fresas-c-crema": {
+  "side": 1257,
+  "product": [
+   703,
+   1081
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 628
+ },
+ "sponch-shake": {
+  "side": 1257,
+  "product": [
+   703,
+   1081
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 628
+ },
+ "torta-del-chavo": {
+  "side": 574,
+  "product": [
+   494,
+   248
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   574
+  ],
+  "sharpUpTo": 287
+ },
+ "vaquita-loca": {
+  "side": 537,
+  "product": [
+   433,
+   462
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   537
+  ],
+  "sharpUpTo": 268
+ },
+ "waffle-con-helado": {
+  "side": 413,
+  "product": [
+   355,
+   354
+  ],
+  "widths": [
+   240,
+   360,
+   413
+  ],
+  "sharpUpTo": 206
+ },
+ "waffle-de-burbuja": {
+  "side": 2280,
+  "product": [
+   1273,
+   1961
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   640,
+   800,
+   1000
+  ],
+  "sharpUpTo": 1140
+ },
+ "waffle-gourmet": {
+  "side": 381,
+  "product": [
+   328,
+   294
+  ],
+  "widths": [
+   240,
+   360,
+   381
+  ],
+  "sharpUpTo": 190
+ },
+ "waffle-simple": {
+  "side": 536,
+  "product": [
+   296,
+   461
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   536
+  ],
+  "sharpUpTo": 268
+ },
+ "yogur-con-fresas": {
+  "side": 492,
+  "product": [
+   348,
+   423
+  ],
+  "widths": [
+   240,
+   360,
+   480,
+   492
+  ],
+  "sharpUpTo": 246
+ }
+}

@@ -1,0 +1,9 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preflight</title>
+<style>body{margin:0;font:600 20px system-ui;background:#fff3f6;color:#5a1030}div{padding:24px}</style></head>
+<body><div>Preflight test page — <span id="w"></span></div><canvas id="c" width="200" height="100"></canvas>
+<script>
+document.getElementById('w').textContent = innerWidth + 'px';
+const gl = document.getElementById('c').getContext('webgl2');
+document.title = gl ? 'webgl2:' + gl.getParameter(gl.VERSION) + ' | ' + (gl.getExtension('EXT_color_buffer_float')?'cbf':'no-cbf') + ' | ' + (gl.getExtension('OES_texture_float_linear')?'ftl':'no-ftl') : 'no-webgl2';
+if (gl) { gl.clearColor(0.9,0.3,0.5,1); gl.clear(gl.COLOR_BUFFER_BIT); }
+</script></body></html>

@@ -1,0 +1,30 @@
+{
+  "name": "la-zacatecana-directions",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Three website directions for La Zacatecana Gourmet Ice Cream Shop & Mex Snacks (sales demo).",
+  "scripts": {
+    "photos": "node scripts/download-photos.mjs && node scripts/process-photos.mjs",
+    "build": "node scripts/build.mjs",
+    "shots": "node scripts/shots.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource/bricolage-grotesque": "^5.3.0",
+    "@fontsource/dm-sans": "^5.3.0",
+    "@fontsource/fredoka": "^5.3.0",
+    "@fontsource/lilita-one": "^5.3.0",
+    "@fontsource/manrope": "^5.3.0",
+    "@fontsource/pacifico": "^5.3.0",
+    "@fontsource/rubik": "^5.3.0",
+    "@fontsource/sacramento": "^5.3.0",
+    "@fontsource/sniglet": "^5.3.0",
+    "@fontsource/unbounded": "^5.3.0",
+    "esbuild": "^0.28.2",
+    "gsap": "^3.15.0",
+    "opentype.js": "^2.0.0",
+    "playwright": "^1.56.1",
+    "sharp": "^0.35.5",
+    "three": "^0.186.1"
+  }
+}
