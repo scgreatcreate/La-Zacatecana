@@ -14,7 +14,8 @@ export default function page({ heroHtml }) {
     description: 'Esquites, elotes, fresas con crema, mangonadas, raspados and 100+ antojos in Acworth, GA. Mexican snacks and ice cream — order pickup or delivery commission-free. 6790 GA-92, Ste 104.',
     themeColor: '#F7C815',
   })}
-<body class="dir dir-b" id="top">
+<body>
+<div class="dir dir-b" id="top">
 ${header({ wordmark: '<img src="brand/wordmark.svg" alt="La Zacatecana — Ice cream &amp; Mex Snacks" width="1260" height="230">' })}
 <main id="main">
 ${heroHtml || FALLBACK_HERO}
@@ -26,6 +27,7 @@ ${visit()}
 ${orderBlock()}
 </main>
 ${footer({ logo: '<img src="brand/logo-round.svg" alt="La Zacatecana Gourmet logo" width="140" height="140" loading="lazy">' })}
+</div>
 ${scripts()}
 </body>
 </html>`;
