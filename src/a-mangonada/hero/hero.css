@@ -1,0 +1,255 @@
+/* Direction A — "La Mangonada, Desarmada" — hero
+   Every selector is scoped under .hero--a. Fonts (Bricolage Grotesque, DM Sans) come from the shell's
+   token block; the cup wordmark is baked outlines (no font needed). */
+
+.hero--a {
+  --a-cream: #FFF8EE;
+  --a-pink: #F9D9E0;
+  --a-pink-2: #F4C2CE;
+  --a-strawberry: #E85A87;
+  --a-magenta: #C2185B;
+  --a-sun: #F7C815;
+  --a-ink: #3A1424;
+  --a-ink-2: #5E2A3D;          /* 8.9:1 on --a-pink */
+  --a-mango: #F39A1E;
+  --a-chamoy: #7E1420;
+  --a-display: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
+  --a-ui: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --a-top: 64px;               /* shell header */
+  --a-bottom: 0px;             /* shell mobile bar */
+
+  position: relative;
+  height: calc(100svh + 150svh);
+  background: var(--a-pink);
+  color: var(--a-ink);
+  font-family: var(--a-ui);
+}
+@media (max-width: 719px) {
+  .hero--a { height: calc(100svh + 120svh); --a-top: 56px; --a-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+}
+.hero--a.is-static { height: 100svh; }
+@media (prefers-reduced-motion: reduce) { .hero--a { height: 100svh; } }
+
+.hero--a *, .hero--a *::before, .hero--a *::after { box-sizing: border-box; }
+
+/* ---------- stage (CSS-sticky pin) ---------- */
+.hero--a .hero-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ---------- studio backdrop: seamless paper sweep in the shop's pink ---------- */
+.hero--a .hero-backdrop { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.hero--a .hero-sweep {
+  position: absolute; inset: 0;
+  background:
+    /* wall falls off toward the top corners */
+    radial-gradient(120% 80% at 50% 108%, rgba(255, 246, 240, 0) 55%, rgba(226, 150, 172, .28) 100%),
+    /* the sweep: brighter where the paper curves toward the lens */
+    linear-gradient(180deg, #F3C3CF 0%, #F7D2DB 34%, #FADDE3 58%, #FDE8EB 72%, #FBE0E6 86%, #F6CCD6 100%);
+}
+.hero--a .hero-sun {
+  /* gentle sunflower accent light, as if from the yellow wall behind the counter */
+  position: absolute;
+  left: var(--a-sun-x, 70%); top: var(--a-sun-y, 30%);
+  width: min(78vw, 980px); aspect-ratio: 1.25;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(247, 200, 21, .30), rgba(247, 200, 21, .12) 45%, rgba(247, 200, 21, 0) 100%);
+  filter: blur(6px);
+}
+.hero--a .hero-floor {
+  /* soft pool of key light on the floor of the sweep */
+  position: absolute; left: 50%; bottom: -14%;
+  width: 150%; height: 52%;
+  transform: translateX(-50%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 248, 238, .75), rgba(255, 248, 238, 0) 70%);
+}
+.hero--a .hero-grain {
+  position: absolute; inset: 0; opacity: .22; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .32  0 0 0 0 .40  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ---------- intro copy ---------- */
+.hero--a .hero-copy {
+  position: absolute; z-index: 2;
+  left: clamp(20px, 6vw, 112px);
+  top: calc(var(--a-top) + max(24px, (100svh - var(--a-top) - 560px) * .42));
+  width: min(46vw, 680px);
+  will-change: transform, opacity;
+}
+.hero--a .hero-eyebrow {
+  margin: 0 0 18px;
+  font: 700 13px/1.2 var(--a-ui);
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--a-magenta);
+  display: flex; align-items: center; gap: 10px;
+}
+.hero--a .hero-eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--a-sun); border-radius: 2px; box-shadow: 0 0 0 1px rgba(194, 24, 91, .08); }
+.hero--a .hero-tagline {
+  margin: 0;
+  font-family: var(--a-display);
+  font-weight: 800;
+  font-size: clamp(44px, 5.7vw, 92px);
+  line-height: .93;
+  letter-spacing: -.04em;
+  color: var(--a-ink);
+  text-wrap: balance;
+}
+.hero--a .hero-tagline__b { color: var(--a-magenta); }
+.hero--a .hero-en {
+  margin: 16px 0 0;
+  font: 500 clamp(18px, 1.6vw, 24px)/1.25 var(--a-ui);
+  letter-spacing: -.01em;
+  color: var(--a-ink-2);
+}
+.hero--a .hero-sell {
+  margin: 22px 0 0;
+  max-width: 34em;
+  font: 400 clamp(15px, 1.15vw, 17px)/1.5 var(--a-ui);
+  color: var(--a-ink);
+}
+.hero--a .hero-actions { margin-top: 28px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.hero--a .btn-order {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 52px; padding: 0 28px;
+  border-radius: 999px;
+  background: var(--a-magenta);
+  color: var(--a-cream);
+  font: 700 17px/1 var(--a-ui);
+  letter-spacing: .01em;
+  text-decoration: none;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .35) inset, 0 10px 24px -10px rgba(122, 16, 58, .55);
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+.hero--a .btn-order::after {
+  content: ""; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--a-sun);
+}
+.hero--a .btn-order:hover { transform: translateY(-1px); background: #A9134E; box-shadow: 0 1px 0 rgba(255,255,255,.35) inset, 0 14px 28px -12px rgba(122, 16, 58, .6); }
+.hero--a .btn-order:focus-visible { outline: 3px solid var(--a-ink); outline-offset: 3px; }
+.hero--a .hero-cue {
+  margin: 0; display: inline-flex; align-items: center; gap: 10px;
+  font: 600 13px/1.2 var(--a-ui); letter-spacing: .02em; color: var(--a-ink-2);
+}
+.hero--a .hero-cue__line { position: relative; width: 1px; height: 28px; background: rgba(58, 20, 36, .25); overflow: hidden; }
+.hero--a .hero-cue__line::after {
+  content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--a-ink);
+  animation: hero-a-cue 2.2s cubic-bezier(.6, 0, .3, 1) infinite;
+}
+@keyframes hero-a-cue { to { top: 100%; } }
+
+/* ---------- cup box: poster now, WebGL framing anchor later ---------- */
+.hero--a .hero-cup {
+  position: absolute; z-index: 1; margin: 0;
+  right: clamp(8px, 7vw, 150px);
+  top: calc(var(--a-top) + (100svh - var(--a-top)) * .5);
+  height: min(84svh - 30px, 820px);
+  aspect-ratio: 4 / 5;
+  transform: translateY(-50%);
+}
+.hero--a .hero-cup picture { display: block; width: 100%; height: 100%; }
+.hero--a .hero-poster {
+  display: block; width: 100%; height: 100%; object-fit: contain;
+  transition: opacity .45s ease;
+}
+.hero--a.is-live .hero-poster { opacity: 0; }
+
+/* ---------- chapters shown while the cup is apart / rebuilt ---------- */
+.hero--a .hero-chapter {
+  position: absolute; z-index: 2;
+  left: clamp(20px, 6vw, 112px);
+  top: 50%;
+  width: min(30vw, 420px);
+  transform: translateY(-50%);
+  opacity: 0; visibility: hidden;
+  pointer-events: none;
+}
+.hero--a .hero-chapter__kicker {
+  margin: 0 0 12px; font: 700 12px/1.2 var(--a-ui); letter-spacing: .16em; text-transform: uppercase; color: var(--a-magenta);
+}
+.hero--a .hero-chapter__title {
+  margin: 0; font: 800 clamp(34px, 3.6vw, 58px)/.95 var(--a-display); letter-spacing: -.035em; color: var(--a-ink); text-wrap: balance;
+}
+.hero--a .hero-chapter__body { margin: 16px 0 0; font: 400 16px/1.5 var(--a-ui); color: var(--a-ink-2); max-width: 26em; }
+
+/* ---------- WebGL overlay (fixed, transparent, never above the shell) ---------- */
+.hero--a .hero-gl {
+  position: fixed; left: 0; top: 0; z-index: 60;
+  width: 100%; height: 100vh; height: 100lvh;
+  pointer-events: none;
+  visibility: hidden;
+}
+.hero--a.is-live .hero-gl { visibility: visible; }
+
+/* ---------- callouts (fixed overlay so dots sit on top of the 3D parts) ---------- */
+.hero--a .hero-callouts {
+  position: fixed; inset: 0; z-index: 60;
+  pointer-events: none;
+  visibility: hidden;
+}
+.hero--a.is-live .hero-callouts { visibility: visible; }
+.hero--a .hero-callouts__lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.hero--a .hero-callouts__lines path { stroke: var(--a-ink); stroke-linecap: round; }
+.hero--a .hero-callouts__lines circle { fill: var(--a-cream); stroke: var(--a-ink); stroke-width: 1.25; }
+.hero--a .hero-callouts__list { list-style: none; margin: 0; padding: 0; }
+.hero--a .hero-callout {
+  position: absolute; left: 0; top: 0;
+  display: flex; flex-direction: column; gap: 2px;
+  max-width: 220px;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.hero--a .hero-callout__es { font: 700 16px/1.1 var(--a-display); letter-spacing: -.015em; color: var(--a-ink); }
+.hero--a .hero-callout__en { font: 500 13px/1.25 var(--a-ui); color: var(--a-ink-2); }
+
+/* ---------- phones ---------- */
+@media (max-width: 719px) {
+  .hero--a .hero-copy {
+    left: 20px; right: 20px; width: auto;
+    top: calc(var(--a-top) + 18px);
+  }
+  .hero--a .hero-eyebrow { font-size: 11px; margin-bottom: 12px; letter-spacing: .12em; }
+  .hero--a .hero-eyebrow::before { width: 18px; }
+  .hero--a .hero-tagline { font-size: clamp(34px, 9.6vw, 44px); line-height: .95; }
+  .hero--a .hero-en { margin-top: 10px; font-size: 17px; }
+  .hero--a .hero-sell { margin-top: 10px; font-size: 14px; line-height: 1.45; }
+  .hero--a .hero-actions { margin-top: 16px; gap: 16px; }
+  .hero--a .btn-order { min-height: 48px; padding: 0 22px; font-size: 16px; }
+  .hero--a .hero-cue { font-size: 12px; }
+  .hero--a .hero-cup {
+    right: auto; left: 50%; top: auto;
+    bottom: calc(var(--a-bottom) + 4px);
+    height: min(calc(100svh - var(--a-top) - var(--a-bottom) - 368px), 118vw);
+    min-height: 220px;
+    transform: translateX(-50%);
+  }
+  .hero--a .hero-chapter {
+    left: 20px; right: 20px; width: auto;
+    top: calc(var(--a-top) + 14px);
+    transform: none;
+  }
+  .hero--a .hero-chapter__kicker { margin-bottom: 6px; font-size: 11px; }
+  .hero--a .hero-chapter__title { font-size: 27px; }
+  .hero--a .hero-chapter__body { display: none; }
+  .hero--a .hero-callout { max-width: 150px; }
+  .hero--a .hero-callout__es { font-size: 14px; }
+  .hero--a .hero-callout__en { font-size: 12px; }
+}
+@media (max-width: 719px) and (max-height: 700px) {
+  .hero--a .hero-sell { display: none; }
+}
+
+/* ---------- static fallback (reduced motion / no WebGL / context lost) ---------- */
+.hero--a.is-static .hero-gl,
+.hero--a.is-static .hero-callouts,
+.hero--a.is-static .hero-chapter,
+.hero--a.is-static .hero-cue { display: none; }
+.hero--a.is-static .hero-poster { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .hero--a .hero-gl, .hero--a .hero-callouts, .hero--a .hero-chapter, .hero--a .hero-cue { display: none; }
+  .hero--a .hero-poster { opacity: 1 !important; transition: none; }
+  .hero--a .btn-order { transition: none; }
+}

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Direction A — hero dev harness</title>
+<link rel="stylesheet" href="../../../node_modules/@fontsource/bricolage-grotesque/700.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/bricolage-grotesque/800.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/dm-sans/400.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/dm-sans/500.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/dm-sans/600.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/dm-sans/700.css">
+<link rel="stylesheet" href="hero.css">
+<style>
+  /* ---- stand-in for the lead's shell (NOT shipped) ---- */
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: #FFF8EE; color: #3A1424; font-family: "DM Sans", system-ui, sans-serif; }
+  .site-header { position: fixed; inset: 0 0 auto 0; height: 64px; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(16px, 4vw, 48px); background: rgba(255, 248, 238, .86); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(58, 20, 36, .08); }
+  .site-header .wm { font: 800 20px/1 "Bricolage Grotesque", sans-serif; letter-spacing: -.03em; color: #C2185B; text-decoration: none; }
+  .site-header .right { display: flex; gap: 12px; align-items: center; }
+  .site-header .lang { border: 1px solid rgba(58,20,36,.2); background: transparent; border-radius: 999px; padding: 8px 12px; font: 600 13px/1 "DM Sans"; color: #3A1424; cursor: pointer; }
+  .site-header .pill { background: #3A1424; color: #FFF8EE; border-radius: 999px; padding: 11px 18px; font: 700 14px/1 "DM Sans"; text-decoration: none; }
+  .mobile-bar { display: none; }
+  @media (max-width: 719px) {
+    .site-header { height: 56px; }
+    .mobile-bar { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; inset: auto 0 0 0; height: calc(64px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); z-index: 100; background: #FFF8EE; border-top: 1px solid rgba(58,20,36,.1); }
+    .mobile-bar a { display: grid; place-items: center; font: 700 13px/1 "DM Sans"; color: #3A1424; text-decoration: none; }
+    .mobile-bar a:first-child { color: #C2185B; }
+  }
+  #favoritos { position: relative; padding: 72px clamp(16px, 6vw, 96px) 120px; background: #FFF8EE; }
+  #favoritos h2 { margin: 0 0 28px; font: 800 clamp(34px, 4vw, 56px)/1 "Bricolage Grotesque"; letter-spacing: -.035em; }
+  .fav-row { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 12px; }
+  .fav-row article { flex: 0 0 260px; width: 260px; height: 320px; border-radius: 22px; background: #fff; box-shadow: 0 1px 0 rgba(58,20,36,.06), 0 18px 40px -26px rgba(58,20,36,.35); overflow: hidden; }
+  .flip-slot { width: 260px; height: 260px; background: #FDEFF2; display: grid; place-items: center; }
+  .flip-slot img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .fav-row h3 { margin: 0; padding: 18px 18px 0; font: 700 18px/1 "Bricolage Grotesque"; }
+  .filler { height: 120vh; background: linear-gradient(#FFF8EE, #F9D9E0); display: grid; place-items: center; font: 600 14px "DM Sans"; color: #5E2A3D; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="wm" href="#hero">La Zacatecana</a>
+  <div class="right">
+    <button class="lang" type="button" id="lang">ES</button>
+    <a class="pill btn-order-pill" data-order="default" href="https://order.online/business/la-zacatecana-ice-cream-shop--mex-snacks-13924473">Order</a>
+  </div>
+</header>
+<main>
+<!--HERO:START-->
+<section id="hero" class="hero hero--a" data-hero data-asset-base="assets/" aria-labelledby="hero-a-title">
+  <noscript><style>.hero--a{height:100svh}.hero--a .hero-gl,.hero--a .hero-callouts{display:none}</style></noscript>
+  <div class="hero-stage">
+    <div class="hero-backdrop" aria-hidden="true">
+      <div class="hero-sweep"></div>
+      <div class="hero-sun"></div>
+      <div class="hero-floor"></div>
+      <div class="hero-grain"></div>
+    </div>
+
+    <div class="hero-copy">
+      <p class="hero-eyebrow" data-i18n-en="Gourmet ice cream &amp; Mex snacks · Acworth, GA" data-i18n-es="Nieves gourmet y antojitos mexicanos · Acworth, GA">Gourmet ice cream &amp; Mex snacks · Acworth, GA</p>
+      <h1 class="hero-tagline" id="hero-a-title" lang="es"><span class="hero-tagline__a">Entras por curiosidad…</span> <span class="hero-tagline__b">vuelves por el&nbsp;antojo.</span></h1>
+      <p class="hero-en" lang="en">Come in curious. Come back craving.</p>
+      <p class="hero-sell" data-i18n-en="Mangonadas, fresas con crema, esquites, crepes, raspados &amp; 100+ antojos — Acworth, GA" data-i18n-es="Mangonadas, fresas con crema, esquites, crepas, raspados y 100+ antojos — Acworth, GA">Mangonadas, fresas con crema, esquites, crepes, raspados &amp; 100+ antojos — Acworth, GA</p>
+      <div class="hero-actions">
+        <a class="btn-order" data-order="default" href="https://order.online/business/la-zacatecana-ice-cream-shop--mex-snacks-13924473"><span data-i18n-en="Order online" data-i18n-es="Ordena en línea">Order online</span></a>
+        <p class="hero-cue" aria-hidden="true"><span class="hero-cue__line"></span><span data-i18n-en="Scroll to take it apart" data-i18n-es="Desliza y la desarmamos">Scroll to take it apart</span></p>
+      </div>
+    </div>
+
+    <figure class="hero-cup">
+      <picture>
+        <source media="(min-width: 720px) and (min-resolution: 1.5dppx)" srcset="assets/poster-1600.webp">
+        <img class="hero-poster" src="assets/poster-800.webp" width="800" height="1000" fetchpriority="high" decoding="async"
+          alt="A La Zacatecana Mangonada: a clear cup printed with the red La Zacatecana logo, filled with swirled mango sorbet, chamoy, fresh mango and Tajín, with a tamarind candy stick and a straw.">
+      </picture>
+    </figure>
+
+    <div class="hero-chapter hero-chapter--apart" aria-hidden="true">
+      <p class="hero-chapter__kicker" data-i18n-en="Taken apart" data-i18n-es="Desarmada">Taken apart</p>
+      <p class="hero-chapter__title" lang="es">La Mangonada, desarmada.</p>
+      <p class="hero-chapter__body" data-i18n-en="Mango sorbet with fresh mango, chamoy and Tajín, finished with a tamarind stick." data-i18n-es="Nieve de mango con mango fresco, chamoy y Tajín, rematada con banderilla de tamarindo.">Mango sorbet with fresh mango, chamoy and Tajín, finished with a tamarind stick.</p>
+    </div>
+    <div class="hero-chapter hero-chapter--together" aria-hidden="true">
+      <p class="hero-chapter__kicker" data-i18n-en="And back together" data-i18n-es="Y armada otra vez">And back together</p>
+      <p class="hero-chapter__title" lang="es">…y de vuelta al vaso.</p>
+      <p class="hero-chapter__body" data-i18n-en="One of 100+ antojos. Keep scrolling for the favorites." data-i18n-es="Uno de más de 100 antojos. Sigue bajando: los favoritos.">One of 100+ antojos. Keep scrolling for the favorites.</p>
+    </div>
+  </div>
+
+  <canvas class="hero-gl" aria-hidden="true"></canvas>
+
+  <div class="hero-callouts">
+    <svg class="hero-callouts__lines" aria-hidden="true" focusable="false"><g fill="none" stroke-width="1"></g></svg>
+    <ul class="hero-callouts__list" aria-label="What goes into a Mangonada">
+      <li class="hero-callout" data-part="banderilla"><span class="hero-callout__es" lang="es">Banderilla de tamarindo</span><span class="hero-callout__en" lang="en">Tamarind candy stick</span></li>
+      <li class="hero-callout" data-part="tajin"><span class="hero-callout__es" lang="es">Tajín</span><span class="hero-callout__en" lang="en">Chile-lime seasoning</span></li>
+      <li class="hero-callout" data-part="mango"><span class="hero-callout__es" lang="es">Mango fresco</span><span class="hero-callout__en" lang="en">Fresh mango</span></li>
+      <li class="hero-callout" data-part="sorbet"><span class="hero-callout__es" lang="es">Nieve de mango</span><span class="hero-callout__en" lang="en">Mango sorbet</span></li>
+      <li class="hero-callout" data-part="chamoy"><span class="hero-callout__es" lang="es">Chamoy</span><span class="hero-callout__en" lang="en">Sweet-tangy chile sauce</span></li>
+    </ul>
+  </div>
+</section>
+<!--HERO:END-->
+<section id="favoritos">
+  <h2>Favoritos</h2>
+  <div class="fav-row">
+    <article data-flip-target="mangonada"><div class="flip-slot"><img src="../../../assets/menu/hero/mangonada.webp" alt="Mangonada" width="1074" height="1400"></div><h3>Mangonada</h3></article>
+    <article><div class="flip-slot"><img src="../../../assets/menu/hero/fresas-con-crema-y-nutella.webp" alt="Fresas con crema" loading="lazy"></div><h3>Fresas con crema</h3></article>
+    <article><div class="flip-slot"><img src="../../../assets/menu/hero/esquite-con-hot-cheetos.webp" alt="Esquite" loading="lazy"></div><h3>Esquite</h3></article>
+    <article><div class="flip-slot"><img src="../../../assets/menu/hero/waffle-de-burbuja.webp" alt="Waffle de burbuja" loading="lazy"></div><h3>Waffle de burbuja</h3></article>
+  </div>
+</section>
+<div class="filler">…rest of the page…</div>
+</main>
+<nav class="mobile-bar"><a data-order="default" href="https://order.online/business/la-zacatecana-ice-cream-shop--mex-snacks-13924473">Order</a><a href="#favoritos">Menu</a><a href="tel:+1">Call</a><a href="#">Directions</a></nav>
+<script>
+  // stand-in for the shell's EN/ES toggle
+  document.getElementById('lang').addEventListener('click', (e) => {
+    const es = document.documentElement.lang !== 'es';
+    document.documentElement.lang = es ? 'es' : 'en';
+    e.currentTarget.textContent = es ? 'EN' : 'ES';
+    document.querySelectorAll('[data-i18n-en]').forEach((el) => { el.textContent = el.getAttribute(es ? 'data-i18n-es' : 'data-i18n-en'); });
+  });
+  // the shell injects hero.js after load + one rAF
+  addEventListener('load', () => requestAnimationFrame(() => { const s = document.createElement('script'); s.src = '.dev/hero.js'; document.body.appendChild(s); }));
+</script>
+</body>
+</html>

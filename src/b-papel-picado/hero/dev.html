@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hero B — Papel Picado (dev)</title>
+<!-- dev harness only: the shell loads these fonts itself -->
+<link rel="stylesheet" href="../../../node_modules/@fontsource/lilita-one/400.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/rubik/400.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/rubik/500.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/rubik/700.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/rubik/500-italic.css">
+<link rel="stylesheet" href="../../../node_modules/@fontsource/fredoka/700.css">
+<link rel="stylesheet" href="hero.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: Rubik, system-ui, sans-serif; background: #fff6e8; color: #2B1020; }
+  .site-header { position: fixed; top: 0; left: 0; right: 0; height: 64px; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(16px, 4vw, 40px); background: rgba(255, 246, 232, 0.92); backdrop-filter: blur(8px); box-shadow: 0 1px 0 rgba(43, 16, 32, 0.08); }
+  .site-header img { height: 34px; width: auto; display: block; }
+  .site-header .right { display: flex; gap: 12px; align-items: center; }
+  .lang { font: 600 14px Rubik; border: 1.5px solid #2B1020; border-radius: 999px; padding: 6px 12px; background: transparent; color: #2B1020; cursor: pointer; }
+  .pill { display: inline-flex; align-items: center; height: 40px; padding: 0 18px; border-radius: 999px; background: #C2185B; color: #fff; font: 700 15px Rubik; text-decoration: none; }
+  .mobile-bar { display: none; }
+  @media (max-width: 719px) {
+    .site-header { height: 56px; }
+    .site-header img { height: 26px; }
+    .mobile-bar { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; height: calc(64px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); z-index: 100; background: #2B1020; }
+    .mobile-bar a { display: flex; align-items: center; justify-content: center; color: #fff6e8; font: 600 13px Rubik; text-decoration: none; }
+    .mobile-bar a:first-child { background: #C2185B; }
+  }
+  #antojo { position: relative; background: var(--counter, #E87FA4); min-height: 120vh; padding: 64px clamp(16px, 5vw, 64px); }
+  #antojo h2 { font: 400 clamp(2rem, 4vw, 3.4rem) "Lilita One"; margin: 0 0 12px; color: #2B1020; }
+  #antojo .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-top: 28px; }
+  #antojo .card { background: #fff6e8; border-radius: 18px; height: 200px; }
+  body.poster .site-header, body.poster .mobile-bar, body.poster .hero-b__frame { visibility: hidden; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <img src="../../../assets/brand/wordmark.svg" alt="La Zacatecana">
+  <div class="right">
+    <button class="lang" type="button" id="lang">ES</button>
+    <a class="pill" data-order="default" href="https://order.online/business/la-zacatecana-ice-cream-shop--mex-snacks-13924473">Order</a>
+  </div>
+</header>
+<main>
+<!-- HERO:START (generated from hero.html by tools/build.mjs) -->
+<section id="hero" class="hero hero--b" data-hero data-asset-base="assets/" aria-labelledby="hero-b-title">
+  <noscript><style>.hero--b{height:100svh!important}.hero--b .hero-stage{position:relative!important;height:100svh!important}.hero--b .hero-b__gl{display:none}</style></noscript>
+  <div class="hero-stage">
+    <picture class="hero-b__poster">
+      <!-- one URL per source: the prod build rewrites each "assets/… to hero-assets/… -->
+      <source media="(max-aspect-ratio: 9/10) and (max-width: 480px) and (max-resolution: 2.2dppx)" srcset="assets/poster-portrait-780.webp">
+      <source media="(max-aspect-ratio: 9/10)" srcset="assets/poster-portrait-1170.webp">
+      <source media="(max-width: 900px) and (max-resolution: 1.1dppx)" srcset="assets/poster-800.webp">
+      <source media="(max-width: 1700px) and (max-resolution: 1.1dppx), (max-width: 900px)" srcset="assets/poster-1600.webp">
+      <img src="assets/poster-2400.webp" alt="" width="1600" height="1000" fetchpriority="high" decoding="async">
+    </picture>
+    <canvas class="hero-b__gl" aria-hidden="true"></canvas>
+    <div class="hero-b__frame">
+      <div class="hero-b__copy">
+        <h1 id="hero-b-title" class="hero-b__title">
+          <span class="hero-b__vh" data-i18n-en="La Zacatecana, gourmet ice cream and Mexican snacks in Acworth, Georgia." data-i18n-es="La Zacatecana, nieves gourmet y antojitos mexicanos en Acworth, Georgia.">La Zacatecana, gourmet ice cream and Mexican snacks in Acworth, Georgia.</span>
+          <span class="hero-b__tagline" lang="es">Entras por curiosidad… <span class="hero-b__tag2">vuelves por el antojo.</span></span>
+        </h1>
+        <p class="hero-b__en" lang="en">Come in curious. Come back craving.</p>
+        <p class="hero-b__sells" data-i18n-en="Fresas con crema, mangonadas, esquites, elotes, crepes, raspados &amp; 100+ antojos." data-i18n-es="Fresas con crema, mangonadas, esquites, elotes, crepas, raspados y más de 100 antojos.">Fresas con crema, mangonadas, esquites, elotes, crepes, raspados &amp; 100+ antojos.</p>
+        <p class="hero-b__addr"><svg class="hero-b__pin" viewBox="0 0 16 20" aria-hidden="true" focusable="false"><path d="M8 0C3.6 0 0 3.5 0 7.9 0 13.6 8 20 8 20s8-6.4 8-12.1C16 3.5 12.4 0 8 0zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>6790 GA-92, Ste 104 · Acworth, GA</p>
+        <div class="hero-b__actions">
+          <a class="btn-order hero-b__order" data-order="default" href="https://order.online/business/la-zacatecana-ice-cream-shop--mex-snacks-13924473" data-i18n-en="Order online" data-i18n-es="Ordena en línea">Order online</a>
+          <a class="hero-b__menu" href="#antojo" data-i18n-en="See the menu" data-i18n-es="Ver el menú">See the menu</a>
+        </div>
+      </div>
+      <div class="hero-b__outro" aria-hidden="true">
+        <p class="hero-b__outro-big" data-i18n-en="100+ antojos on the counter" data-i18n-es="Más de 100 antojos en el mostrador">100+ antojos on the counter</p>
+        <a class="hero-b__outro-link" href="#antojo" data-i18n-en="Find your craving ↓" data-i18n-es="Encuentra tu antojo ↓">Find your craving ↓</a>
+      </div>
+    </div>
+    <div class="hero-b__seam" aria-hidden="true"></div>
+  </div>
+</section>
+<!-- HERO:END -->
+<section id="antojo">
+  <h2>¿Qué se te antoja?</h2>
+  <p>Fake next section — its top edge is the counter pink (<code>--counter</code>).</p>
+  <div class="grid"><div class="card"></div><div class="card"></div><div class="card"></div><div class="card"></div><div class="card"></div><div class="card"></div></div>
+</section>
+</main>
+<nav class="mobile-bar"><a href="#" data-order="default">Order</a><a href="#antojo">Menu</a><a href="#">Call</a><a href="#">Directions</a></nav>
+<script>
+  if (/[?&]poster/.test(location.search)) document.body.classList.add('poster');
+  document.getElementById('lang').addEventListener('click', function () {
+    var es = document.documentElement.lang !== 'es';
+    document.documentElement.lang = es ? 'es' : 'en';
+    this.textContent = es ? 'EN' : 'ES';
+    document.querySelectorAll('[data-i18n-en]').forEach(function (el) { el.textContent = el.getAttribute(es ? 'data-i18n-es' : 'data-i18n-en'); });
+  });
+  // mimic the shell: inject hero.js after load + one rAF (unless ?nojs)
+  if (!/[?&]nojs/.test(location.search)) {
+    addEventListener('load', function () {
+      requestAnimationFrame(function () { var s = document.createElement('script'); s.src = '.dev/hero.js'; document.body.appendChild(s); });
+    });
+  }
+</script>
+</body>
+</html>
