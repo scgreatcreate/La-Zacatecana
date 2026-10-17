@@ -2,7 +2,7 @@
    Fonts (Lilita One 400, Rubik 400/500/700) are loaded by the shell. */
 
 .hero--b {
-  --counter: #E87FA4;            /* the pink counter; #antojo's top edge uses the same colour */
+  --counter: #EE8DB2;            /* the pink counter at p = 1; #antojo's top edge uses the same colour */
   --hb-ink: #2B1020;
   --hb-cantera: #E7A9AE;
   --hb-magenta: #D6246E;
@@ -194,7 +194,7 @@
   z-index: 3;
   opacity: 0;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(232, 127, 164, 0), var(--counter) 62%);
+  background: linear-gradient(to bottom, rgba(238, 141, 178, 0), var(--counter) 62%);
 }
 
 /* ---------- phones: copy sits under the arched window, clear of the 72px mobile bar */

@@ -9,6 +9,7 @@ export function createFluid(ctx, cfg) {
     splat: compile(ctx, S.VS, S.SPLAT),
     advect: compile(ctx, S.VS, S.ADVECT),
     curl: compile(ctx, S.VS, S.CURL),
+    visc: compile(ctx, S.VS, S.VISCOUS),
     forces: compile(ctx, S.VS, S.FORCES),
     div: compile(ctx, S.VS, S.DIVERGENCE),
     pressure: compile(ctx, S.VS, S.PRESSURE),
@@ -131,6 +132,10 @@ export function createFluid(ctx, cfg) {
     gl.disable(gl.BLEND);
     flush('vel', vel, 0);
     flush('dye', dye, 3.2);
+    for (let i = 0; i < 2 && f.visc > 0; i++) {
+      P.visc.use().f('uTexel', vel.tx, vel.ty).t('uVelocity', vel.read).f('uA', f.visc);
+      draw(ctx, vel.write); vel.swap();
+    }
     P.curl.use().f('uTexel', vel.tx, vel.ty).t('uVelocity', vel.read);
     draw(ctx, curl);
     neonRect(P.forces.use().f('uTexel', vel.tx, vel.ty).t('uVelocity', vel.read).t('uCurl', curl).t('uDye', dye.read)

@@ -8,6 +8,25 @@ import opentype from 'opentype.js';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../..');
 const font = (w) => opentype.parse(fs.readFileSync(path.join(root, `node_modules/@fontsource/fredoka/files/fredoka-latin-${w}-normal.woff`)).buffer);
 
+// integer, relative, minimal-separator SVG path (≈40% smaller than absolute toPathData)
+function compact(cmds) {
+  let out = '', cx = 0, cy = 0, sx = 0, sy = 0, prev = '';
+  const num = (n) => { const v = Math.round(n); return v; };
+  const nums = (arr) => arr.map((v, i) => (i === 0 || v < 0 ? '' : ' ') + v).join('');
+  for (const c of cmds) {
+    let letter, args;
+    if (c.type === 'M') { const x = num(c.x), y = num(c.y); letter = 'm'; args = [x - cx, y - cy]; cx = sx = x; cy = sy = y; }
+    else if (c.type === 'L') { const x = num(c.x), y = num(c.y); letter = 'l'; args = [x - cx, y - cy]; cx = x; cy = y; }
+    else if (c.type === 'Q') { const x1 = num(c.x1), y1 = num(c.y1), x = num(c.x), y = num(c.y); letter = 'q'; args = [x1 - cx, y1 - cy, x - cx, y - cy]; cx = x; cy = y; }
+    else if (c.type === 'C') { const x1 = num(c.x1), y1 = num(c.y1), x2 = num(c.x2), y2 = num(c.y2), x = num(c.x), y = num(c.y); letter = 'c'; args = [x1 - cx, y1 - cy, x2 - cx, y2 - cy, x - cx, y - cy]; cx = x; cy = y; }
+    else if (c.type === 'Z') { out += 'z'; cx = sx; cy = sy; prev = 'z'; continue; }
+    const body = nums(args);
+    out += (letter === prev && letter !== 'm' ? (args[0] < 0 ? '' : ' ') : letter) + body;
+    prev = letter;
+  }
+  return out;
+}
+
 function bake(f, text, size, letterSpacing = 0) {
   const p = f.getPath(text, 0, 0, size, { kerning: true, letterSpacing });
   const bb = p.getBoundingBox();
@@ -16,7 +35,7 @@ function bake(f, text, size, letterSpacing = 0) {
     for (const k of ['x', 'x1', 'x2']) if (k in c) c[k] = +(c[k] - bb.x1).toFixed(0);
     for (const k of ['y', 'y1', 'y2']) if (k in c) c[k] = +(c[k] - bb.y1).toFixed(0);
   }
-  return { d: p.toPathData(0), w: +(bb.x2 - bb.x1).toFixed(0), h: +(bb.y2 - bb.y1).toFixed(0), baseline: +(-bb.y1).toFixed(0) };
+  return { d: compact(p.commands), w: +(bb.x2 - bb.x1).toFixed(0), h: +(bb.y2 - bb.y1).toFixed(0), baseline: +(-bb.y1).toFixed(0) };
 }
 
 const out = {

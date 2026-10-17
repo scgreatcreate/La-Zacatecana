@@ -2,7 +2,7 @@
 // Everything shades in linear space and writes sRGB itself (no renderer tone mapping),
 // so flat brand colours (yellow wall, pink counter) land on their exact hex values.
 
-export const MAX_STR = 10; // half-strings: 4 outdoor strings × 2 halves + 1 string inside the shop × 2
+export const MAX_STR = 14; // half-strings: slots 0–7 outdoor (≤4 strings × 2 halves), 8–13 inside the shop (3 strings × 2)
 
 const COMMON = /* glsl */ `
 vec3 toLin(vec3 c){ return pow(max(c, 0.0), vec3(2.2)); }
@@ -184,10 +184,12 @@ void main(){
   float m = texture2D(uAtlas, vTile.xy + vUV * vTile.zw).r;
   float cov = smoothstep(0.32, 0.68, m);
   if (cov < 0.01) discard;
-  // tissue transmits its own hue strongly; doubled header transmits less
-  vec3 tr = pow(vCol, vec3(0.88)) * 0.9 + 0.02;
+  // sunlight through dyed tissue: the wall under a sheet loses ~20% and takes on the sheet's hue;
+  // cuts and gaps stay full sun (they become the brighter spots once blurred). The doubled header is a touch denser.
+  vec3 hue = vCol / max(max(vCol.r, vCol.g), max(vCol.b, 1e-3));
+  vec3 tr = 0.78 * mix(vec3(1.0), hue, 0.4);
   float hdr = 1.0 - step(uHeader, vUV.y);
-  tr = mix(tr, tr * tr * 1.05, hdr);
+  tr *= mix(1.0, 0.92, hdr);
   gl_FragColor = vec4(mix(vec3(1.0), tr, cov), vD);
 }`;
 
@@ -248,7 +250,7 @@ void main(){
 }`;
 export const CORD_SH_FS = /* glsl */ `
 varying float vD;
-void main(){ gl_FragColor = vec4(vec3(0.42, 0.4, 0.38), vD); }`;
+void main(){ gl_FragColor = vec4(vec3(0.82, 0.8, 0.78), vD); }`;
 
 // ------------------------------------------------------------------ fullscreen passes
 export const FS_VS = /* glsl */ `
@@ -303,7 +305,7 @@ void main(){
   // flow banding typical of ignimbrite (cantera): stretched noise
   float mott = fbmP(uv * vec2(3.0, 6.0) + vec2(0.0, fbmP(uv * 4.0, vec2(4.0), 3) * 0.6), vec2(3.0, 6.0), 5);
   float grain = fbmP(uv * 48.0, vec2(48.0), 4);
-  float pores = cellsP(uv * 110.0, vec2(110.0), 0.3, 0.1, 0.3);
+  float pores = cellsP(uv * 150.0, vec2(150.0), 0.26, 0.1, 0.26);
   pores = max(pores, cellsP(uv * 34.0 + 0.5, vec2(34.0), 0.08, 0.06, 0.16) * 0.8);
   float clasts = cellsP(uv * 70.0 + 0.25, vec2(70.0), 0.18, 0.1, 0.3) * smoothstep(0.45, 0.75, vnP(uv * 9.0, vec2(9.0)));
   gl_FragColor = vec4(mott, grain, pores, clasts);
@@ -454,7 +456,7 @@ void main(){
   float wth = vnoise(p * 1.7 + m.y * 31.0);
   alb *= mix(1.0, 0.86, smoothstep(0.62, 0.9, wth) * step(0.45, fract(m.y * 5.3)));
   alb = mix(alb, alb * 1.08 + 0.015, smoothstep(0.7, 0.95, vnoise(p * 3.1 - m.y * 17.0)) * 0.6);
-  alb = mix(alb, alb * toLin(vec3(0.66, 0.48, 0.52)), st.b * 0.7);
+  alb = mix(alb, alb * toLin(vec3(0.7, 0.53, 0.57)), st.b * 0.5);
   alb = mix(alb, toLin(vec3(0.97, 0.87, 0.83)), st.a * 0.32);
   alb *= uAlb;
   // weathering: a little darker toward the ground
@@ -514,6 +516,7 @@ uniform vec3 uMax;
 uniform vec3 uYellow;
 uniform vec3 uPinkWall;
 uniform vec3 uWhite;
+uniform vec3 uCeil;
 uniform float uExpo;
 uniform vec2 uRes;
 uniform float uVig;
@@ -559,13 +562,12 @@ void main(){
     col *= mix(0.7, 1.0, seam);
     ao *= smoothstep(-0.2, 1.2, min(min(dx0, dx1), dz0)) * 0.35 + 0.65;
   } else if (n.y < -0.5) {
-    // drop ceiling with tiles and a couple of light panels
+    // warm ceiling: soft plaster tone, the faintest tile grid, falling off toward the edges
     vec2 g = vW.xz / 0.61;
     vec2 fg = abs(fract(g) - 0.5);
-    float grid = smoothstep(0.47, 0.49, max(fg.x, fg.y));
-    col = uWhite * 0.86 * (1.0 - grid * 0.18);
-    vec2 cell = floor(g);
-    if (mod(cell.x, 4.0) == 1.0 && mod(cell.y, 3.0) == 1.0) col = vec3(1.25, 1.22, 1.15);
+    float grid = smoothstep(0.47, 0.495, max(fg.x, fg.y));
+    col = uCeil * (1.0 - grid * 0.06);
+    col *= 0.72 + 0.2 * exp(-pow(vW.x / 3.0, 2.0));
   } else {
     // side walls: pink wainscot + white above (their real wall language)
     col = vW.y < uWainscot ? uPinkWall : uWhite;

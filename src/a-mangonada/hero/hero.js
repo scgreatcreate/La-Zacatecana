@@ -2,10 +2,8 @@
 import {
   WebGLRenderer, Scene, PerspectiveCamera, PMREMGenerator, DirectionalLight, NeutralToneMapping,
   Matrix4, Vector3, Color, Mesh, BoxGeometry, MeshBasicMaterial,
-} from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+} from './three-lite.js';
+import { RoomEnvironment } from './RoomEnvironment.js';
 import { buildMangonada } from './parts.js';
 import { applyPose, domState, shotWeights, PIN_P, W as WIN, k as partK } from './choreo.js';
 import { createCallouts } from './callouts.js';
@@ -43,8 +41,7 @@ function tintRoom(room) {
     if (!o.isMesh) return;
     const m = o.material;
     if (m.side === 1 /* BackSide: the room shell */) m.color = new Color('#efe4e2');
-    else if (m.isMeshBasicMaterial && o.position.x > 14) m.color.setRGB(1, 0.78, 0.2).multiplyScalar(22); // sunflower panel, right
-    else if (m.isMeshBasicMaterial && o.position.z > 14) m.color.setRGB(1, 0.94, 0.95).multiplyScalar(40);
+    else if (m.isMeshLambertMaterial && o.position.x > 14) m.emissive.setRGB(1, 0.8, 0.28); // sunflower panel, right (r186: emissive Lambert)
   });
   // bottle-photography rig: two tall strip softboxes in front + black flags outside them.
   // Strips give PET its vertical highlight lines, flags give it dark edges → it reads as clear plastic.
@@ -75,13 +72,21 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
   const tier = POSTER ? 'hi' : (phoneQ.matches || Math.min(screen.width, screen.height) < 600 ? 'phone' : 'hi');
   const phone = tier === 'phone';
   const coarse = window.matchMedia('(hover: none)').matches;
+  // software GL (SwiftShader / llvmpipe — VMs, remote desktops, blocklisted GPUs, headless review): ~1 fps, so render
+  // only when scroll changes (no time-based ambient), land on the scroll target directly, and keep buffers small.
+  let soft = false;
+  try {
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    soft = /swiftshader|llvmpipe|software|basic render/i.test(String(gl.getParameter(dbg ? dbg.UNMASKED_RENDERER_WEBGL : gl.RENDERER)));
+  } catch (e) { soft = false; }
+  const CALM = STILL || soft;
 
   // ------------------------------------------------------------------ renderer / scene
   const renderer = new WebGLRenderer({ canvas, context: gl, antialias: true, alpha: true, premultipliedAlpha: true });
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = NeutralToneMapping;
   renderer.toneMappingExposure = 0.96;
-  renderer.transmissionResolutionScale = phone ? 0.6 : 0.8;
+  renderer.transmissionResolutionScale = POSTER ? 1 : soft ? 0.5 : phone ? 0.6 : 0.8;
   renderer.setPixelRatio(POSTER ? 1 : Math.min(window.devicePixelRatio || 1, phone ? 1.5 : 2));
 
   const scene = new Scene();
@@ -142,6 +147,9 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
   }
 
   // ------------------------------------------------------------------ layout (measured on refresh)
+  // --a-top / --a-bottom contain calc()+env(); resolve them through probes (getPropertyValue returns the raw text)
+  const mkProbe = (h) => { const d = document.createElement('div'); d.setAttribute('aria-hidden', 'true'); d.style.cssText = `position:absolute;left:0;top:0;width:0;visibility:hidden;pointer-events:none;height:${h}`; stage.appendChild(d); return d; };
+  const probeT = mkProbe('var(--a-top)'), probeB = mkProbe('var(--a-bottom)');
   const L = { vw: 1, vh: 1, cw: 1, ch: 1, sectionTop: 0, pinDist: 1, pinEnd: 1, endScroll: 2, stageH: 1, top: 64, bottom: 0, cup: { x: 0, y: 0, w: 1, h: 1 }, slot: null, img: null, fit: 'contain', hasSlot: false };
   function measure() {
     const sy = window.scrollY;
@@ -151,9 +159,8 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
     L.stageH = stage.offsetHeight;
     L.pinDist = Math.max(1, section.offsetHeight - L.stageH);
     L.pinEnd = L.sectionTop + L.pinDist;
-    const cs = getComputedStyle(section);
-    L.top = parseFloat(cs.getPropertyValue('--a-top')) || 64;
-    L.bottom = parseFloat(cs.getPropertyValue('--a-bottom')) || 0;
+    L.top = probeT.offsetHeight || 64;
+    L.bottom = probeB.offsetHeight || 0;
     const st = stage.getBoundingClientRect();
     const cr = cupBox.getBoundingClientRect();
     L.cup = { x: cr.left - st.left, y: cr.top - st.top, w: cr.width, h: cr.height };
@@ -163,8 +170,9 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
     if (L.img) { L.fit = getComputedStyle(L.img).objectFit || 'fill'; scanPhoto(); }
     const maxScroll = Math.max(0, document.documentElement.scrollHeight - L.vh);
     if (L.hasSlot) {
-      const r = L.slot.getBoundingClientRect();
-      const want = r.top + sy + r.height / 2 - L.vh * (phoneQ.matches ? 0.47 : 0.5);
+      let docTop = 0;
+      for (let el = L.slot; el; el = el.offsetParent) docTop += el.offsetTop; // ignores transforms (reveal animations)
+      const want = docTop + L.slot.offsetHeight / 2 - L.vh * (phoneQ.matches ? 0.47 : 0.5);
       L.endScroll = Math.min(maxScroll, Math.max(L.pinEnd + L.vh * 0.3, want));
     } else {
       L.endScroll = Math.min(maxScroll, L.pinEnd + L.vh * 0.5);
@@ -298,17 +306,17 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
 
   // ------------------------------------------------------------------ frame
   let raf = 0, last = 0, t0 = -1, pDisp = -1, lost = false, docVisible = !document.hidden, inView = true, live = false;
-  const info = { calls: 0, triangles: 0, frameMs: 0, frames: 0 };
+  const info = { calls: 0, triangles: 0, frameMs: 0, frames: 0, tier: soft ? 'software' : tier };
   let lastSig = '';
 
   function render(now) {
     const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
     last = now;
     if (t0 < 0) t0 = now;
-    const t = STILL ? 0 : (now - t0) / 1000;
+    const t = CALM ? 0 : (now - t0) / 1000;
     const s = window.scrollY;
     const pT = pFromScroll(s);
-    if (pDisp < 0 || STILL) pDisp = pT;
+    if (pDisp < 0 || CALM) pDisp = pT;
     else { pDisp += (pT - pDisp) * (1 - Math.exp(-dt * 11)); if (Math.abs(pT - pDisp) < 2e-4) pDisp = pT; }
     const p = pDisp;
     const tStart = performance.now();
@@ -322,19 +330,19 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
     const settle = 1 - smooth(seg(p, 0.84, 0.95));
     const k = 1 - Math.exp(-dt * 3.5);
     ptr.x += (ptr.tx - ptr.x) * k; ptr.y += (ptr.ty - ptr.y) * k;
-    const auto = coarse && !STILL ? Math.sin(t * 0.32) : 0;
+    const auto = coarse && !CALM ? Math.sin(t * 0.32) : 0;
     sh.az += (ptr.x * 0.16 + auto * 0.09) * settle;
-    sh.el += (ptr.y * 0.07 + (coarse && !STILL ? Math.sin(t * 0.21 + 1) * 0.025 : 0)) * settle;
+    sh.el += (ptr.y * 0.07 + (coarse && !CALM ? Math.sin(t * 0.21 + 1) * 0.025 : 0)) * settle;
     applyShot(sh, L.cw, L.ch);
 
     // ---- scene pose
-    applyPose(P, p, t, STILL);
+    applyPose(P, p, t, CALM);
     const apart = clamp01(w.a * (1 - w.b));
-    const swayAmp = (STILL ? 0 : 1) * lerp(1, 0.3, apart) * settle;
+    const swayAmp = (CALM ? 0 : 1) * lerp(1, 0.3, apart) * settle;
     P.root.rotation.y = swayAmp * 0.34 * Math.sin(t * 0.42);
 
     // ---- DOM
-    const D = domState(p);
+    const D = domState(p, L.vw < 720);
     setStyle(copy, 'opacity', D.copy.toFixed(3));
     setStyle(copy, 'transform', `translate3d(0, ${(-28 * (1 - D.copy)).toFixed(1)}px, 0)`);
     setStyle(copy, 'visibility', D.copy < 0.01 ? 'hidden' : '');
@@ -374,7 +382,7 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
 
     // ---- render (skip identical frames: frozen tooling mode, or p/pointer settled with no ambient)
     const sig = `${p}|${sh.cx.toFixed(2)}|${sh.cy.toFixed(2)}|${sh.az.toFixed(5)}|${sh.el.toFixed(5)}|${L.cw}x${L.ch}`;
-    const same = STILL && sig === lastSig;
+    const same = CALM && sig === lastSig;
     lastSig = sig;
     if (!done && !same) {
       renderer.render(scene, camera);
@@ -403,24 +411,28 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
   function wake() { if (!raf && live && !lost) raf = requestAnimationFrame(loop); }
 
   // ------------------------------------------------------------------ scroll + lifecycle
-  gsap.registerPlugin(ScrollTrigger);
-  ScrollTrigger.config({ ignoreMobileResize: true });
-  const trigger = ScrollTrigger.create({
-    trigger: section,
-    start: 'top top',
-    end: () => { measure(); return L.endScroll; },
-    invalidateOnRefresh: true,
-    onUpdate: wake, onToggle: wake, onRefresh: () => { sizeCanvas(false); callouts.measure(); wake(); },
-  });
+  // p is computed from window.scrollY every frame (pure function of scroll), so all we need from a scroll
+  // library is the refresh lifecycle. Native equivalent of ScrollTrigger's (incl. ignoreMobileResize): re-measure
+  // on load, on width changes / height changes ≥ 160 px (not on the iOS URL bar), and when the next section reflows.
+  let refreshT = 0, lastW = window.innerWidth, lastH = window.innerHeight;
+  const refresh = () => { if (lost) return; measure(); sizeCanvas(false); callouts.measure(); wake(); };
+  const scheduleRefresh = (ms = 120) => { clearTimeout(refreshT); refreshT = setTimeout(refresh, ms); };
   window.addEventListener('scroll', wake, { passive: true });
-  window.addEventListener('resize', () => { sizeCanvas(false); wake(); }, { passive: true });
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    if (w !== lastW || Math.abs(h - lastH) >= 160) { lastW = w; lastH = h; scheduleRefresh(); }
+    wake();
+  }, { passive: true });
+  window.addEventListener('load', () => scheduleRefresh(0), { once: true });
+  window.addEventListener('pageshow', () => scheduleRefresh(0));
   document.addEventListener('visibilitychange', () => { docVisible = !document.hidden; last = 0; wake(); });
   const io = new IntersectionObserver((es) => { inView = es[0].isIntersecting; wake(); }, { rootMargin: '0px 0px 40% 0px' });
   io.observe(section);
-  let roT = 0;
-  const ro = new ResizeObserver(() => { clearTimeout(roT); roT = setTimeout(() => ScrollTrigger.refresh(), 160); });
+  const ro = new ResizeObserver(() => scheduleRefresh(160));
+  ro.observe(section);
   const fav = document.querySelector('[data-flip-target="mangonada"]');
   if (fav) ro.observe(fav.closest('section') || fav);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => scheduleRefresh(0));
 
   canvas.addEventListener('webglcontextlost', (e) => {
     e.preventDefault();
@@ -430,7 +442,7 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
     const s = window.scrollY;
     const wasPast = s > L.pinEnd, wasIn = s > L.sectionTop && !wasPast;
     if (L.img) L.img.style.opacity = '';
-    trigger.kill();
+    ro.disconnect(); io.disconnect(); clearTimeout(refreshT);
     goStatic('context-lost');
     // keep the reader where they were once the pinned track collapses
     if (wasPast) window.scrollTo(0, s - L.pinDist); else if (wasIn) window.scrollTo(0, L.sectionTop);
@@ -453,7 +465,6 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
   };
   const ready = renderer.compileAsync ? renderer.compileAsync(scene, camera).catch(() => {}) : Promise.resolve();
   ready.then(begin);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { callouts.measure(); });
 
   // QA hooks (read-only; used by tools/shots.mjs and tools/check.mjs)
   window.__heroA = {

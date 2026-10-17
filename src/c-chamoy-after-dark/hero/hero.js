@@ -92,7 +92,7 @@ async function boot() {
 
   let fluid;
   try { fluid = createFluid(ctx); } catch (e) { console.warn('[hero-c]', e); return goStatic('shader'); }
-  const divider = createDivider({ split, dulce, handle });
+  const divider = createDivider({ split, dulce, handle, hint: !freeze });
 
   // ---------------------------------------------------------------- layout / textures
   const L = {};
@@ -112,12 +112,13 @@ async function boot() {
     const n = paintNeon(signSvg, box, k);
     L.neonRect = [n.rect.x / L.cssW, 1 - (n.rect.y + n.rect.h) / L.cssH, n.rect.w / L.cssW, n.rect.h / L.cssH];
     fluid.setNeon(n.canvas, L.neonRect);
-    // where the static pour falls (viewBox x 144.5, half width 8.5) and where letters sit
+    // where the static pour falls (onto the top of the "t" loop: viewBox x 197.3, half width 6.1) and where letters sit
     const vb = signSvg.viewBox.baseVal;
     const s = Math.min(box.w / vb.width, box.h / vb.height);
     const ox = box.x + (box.w - vb.width * s) / 2 - vb.x * s, oy = box.y + (box.h - vb.height * s) / 2 - vb.y * s;
-    L.pourX = (ox + 144.5 * s) / L.cssW;
-    L.pourHalf = Math.max(5, 8.5 * s);
+    L.pourX = (ox + 197.3 * s) / L.cssW;
+    L.pourHalf = Math.max(4, 6.1 * s);
+    L.tFoot = { x: ox + 199 * s, y: oy + 42 * s };
     L.letters = { x0: ox + 95 * s, x1: ox + 380 * s, y: oy + 41 * s, s };
     // copy-safe rect (legibility mask), css px top-left
     const bs = [words, actions, cue].filter(Boolean).map((el) => stageBox(el, stage));
@@ -183,10 +184,13 @@ async function boot() {
 
   // ---------------------------------------------------------------- forces / inputs
   const toTex = () => fluid.dims.sh / L.cssH;        // css px -> sim texels
-  function pour(t) { // the intro pour: thick, tapers off, then a thin trickle with the odd glug
-    const intro = t < 0.95 ? 1 : 1 - sm(0.95, 1.5, t);
-    const trickle = sm(1.1, 1.8, t) * (0.12 + 0.16 * Math.pow(Math.max(0, Math.sin(t * 1.3)), 10));
-    return Math.max(intro, trickle);
+  // the intro pour lands on the "t": thick for 0.6 s, gone by 1.0 s (the name reads well inside 1.5 s);
+  // afterwards a short glug now and then keeps the sign dripping
+  function pour(t) {
+    const intro = t < 0.6 ? 1 : 1 - sm(0.6, 1.0, t);
+    const u = (t - 5.5) % 8.5;
+    const glug = t > 5.5 && u < 0.5 ? Math.sin((u / 0.5) * Math.PI) * 0.55 : 0;
+    return Math.max(intro, glug);
   }
   function inputs(dt, c) {
     const k = toTex();
@@ -194,7 +198,7 @@ async function boot() {
     // pour (intro)
     const pw = pour(simT);
     if (pw > 0.001 && live) {
-      const hw = L.pourHalf * (0.25 + 0.75 * pw);
+      const hw = L.pourHalf * (0.35 + 0.65 * pw);
       fluid.splat('dye', L.pourX, 1 - 4 / L.cssH, hw / L.cssH, 28 / L.cssH,
         DYE_RGB.chamoy.map((v) => v * 1.6).concat(1.6), 1);
       fluid.splat('vel', L.pourX, 1 - 4 / L.cssH, hw / L.cssH, 40 / L.cssH, [0, -430 * k * Math.max(pw, 0.55)], 1);
@@ -202,8 +206,9 @@ async function boot() {
     // ambient drips off the letters
     if (live && simT > nextDrip) {
       nextDrip = simT + 0.45 + rand() * 1.0;
-      const x = L.letters.x0 + rand() * (L.letters.x1 - L.letters.x0);
-      const y = L.letters.y + 2;
+      const atT = rand() < 0.45;   // most drips come off the foot of the "t" the pour ran down
+      const x = atT ? L.tFoot.x + (rand() - 0.5) * 3 : L.letters.x0 + rand() * (L.letters.x1 - L.letters.x0);
+      const y = atT ? L.tFoot.y : L.letters.y + 2;
       const col = rand() < 0.75 ? DYE_RGB.chamoy : DYE_RGB.deep;
       const r = 4 + rand() * 3;
       fluid.splat('dye', x / L.cssW, 1 - y / L.cssH, r / L.cssH, (r + 2) / L.cssH, col.map((v) => v * 1.5).concat(1.5), 0);
@@ -267,8 +272,8 @@ async function boot() {
   }
 
   const F = { // fluid parameters
-    curl: 5, iters: 16, velDiss: 0.8, dyeDiss: 0.05,
-    poolCol: DYE_RGB.chamoy.map((v) => v), poolA: 1.5, poolRate: 0.9, poolDamp: 0.7, neonDiss: 0.9,
+    curl: 1.2, iters: 16, velDiss: 1.5, dyeDiss: 0.022, visc: 0.45,
+    poolCol: DYE_RGB.chamoy.map((v) => v), poolA: 1.5, poolRate: 0.9, poolDamp: 0.7, neonDiss: 1.8,
   };
   const frameState = {};
   let last = performance.now();
@@ -306,20 +311,29 @@ async function boot() {
     const simulate = !freeze && c.level > -0.05;
     if (simulate) {
       inputs(dt, c);
-      fluid.step(dt, { ...F, iters: L.iters, time: ambT, grav: 0.6 * fluid.dims.sh, drain: c.drain * 0.9 * fluid.dims.sh,
-        drag: 3, poolY: c.level > 0.2 ? L.poolY : 0 });
-      fluid.stepParticles(dt, { seedT: ambT, poolY: L.poolY, spawn: [L.pourX, 0.98, (L.pourHalf * 2) / L.cssW, pour(simT) > 0.05 ? 1 : 0] });
+      fluid.step(dt, { ...F, iters: L.iters, time: ambT, grav: 0.78 * fluid.dims.sh, drain: c.drain * 0.9 * fluid.dims.sh,
+        drag: 1.5, poolY: c.level > 0.2 ? L.poolY : 0 });
+      fluid.stepParticles(dt, { seedT: ambT, poolY: L.poolY, spawn: [L.pourX, 0.98, (L.pourHalf * 2) / L.cssW, 0] });
       simT += dt;
     }
 
     const neonBottom = L.neonRect[1] - c.shiftBg;
     const ni = neonLevels(now);
+    // the sign shorts out as the liquid drains past it (stutter keyed to scroll, so it rewinds exactly)
+    const nTop = neonBottom + L.neonRect[3];
+    const under = clamp((c.level - neonBottom - 0.04) / (nTop - neonBottom));
+    if (under < 1) {
+      const k = Math.floor(p * 160);
+      const flick = (Math.sin(k * 12.9898) * 43758.5453) % 1;
+      const f = under * (Math.abs(flick) > 0.35 ? 1 : 0.25);
+      ni[0] *= f; ni[1] *= f;
+    }
     Object.assign(frameState, {
       level: c.level, time: freeze ? 3.0 : ambT, streamX: divider.base, mound: c.stream * (c.level > -0.02 ? 1 : 0),
       neonI: ni, shift: c.shift, shiftBg: c.shiftBg,
       bloomK: c.level > neonBottom - 0.03 ? 0.62 : 0.0,
       copy: L.copy, copyK: c.copyO,
-      dripS: L.desk ? 1.7 : 1, div, divN: divider.N, stream: [L.desk ? 9.5 : 6.5, c.stream * (c.level < 1.02 ? 1 : 0), 2.6, 0], drip: c.drip,
+      dripS: L.desk ? 1.35 : 1, div, divN: divider.N, stream: [L.desk ? 9.5 : 6.5, c.stream * (c.level < 1.02 ? 1 : 0), 2.6, 0], drip: c.drip,
       flecks: c.level > -0.05, fleckPx: 1.9 * L.dpr, glint: 1,
     });
     fluid.render(frameState);
@@ -334,8 +348,8 @@ async function boot() {
     for (let i = 0; i < steps; i++) {
       const c = choreo(0);
       inputs(1 / 60, c);
-      fluid.step(1 / 60, { ...F, iters: L.iters, time: ambT, grav: 0.6 * fluid.dims.sh, drain: 0, drag: 3, poolY: L.poolY });
-      fluid.stepParticles(1 / 60, { seedT: ambT, poolY: L.poolY, spawn: [L.pourX, 0.98, (L.pourHalf * 2) / L.cssW, pour(simT) > 0.05 ? 1 : 0] });
+      fluid.step(1 / 60, { ...F, iters: L.iters, time: ambT, grav: 0.78 * fluid.dims.sh, drain: 0, drag: 1.5, poolY: L.poolY });
+      fluid.stepParticles(1 / 60, { seedT: ambT, poolY: L.poolY, spawn: [L.pourX, 0.98, (L.pourHalf * 2) / L.cssW, 0] });
       simT += 1 / 60; ambT += 1 / 60;
     }
   }

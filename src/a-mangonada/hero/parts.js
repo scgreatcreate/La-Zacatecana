@@ -4,8 +4,8 @@ import {
   BufferGeometry, Float32BufferAttribute, LatheGeometry, CylinderGeometry, OctahedronGeometry, PlaneGeometry,
   Mesh, InstancedMesh, Group, Vector2, Color, DoubleSide, MeshPhysicalMaterial, MeshStandardMaterial,
   MeshBasicMaterial, AdditiveBlending, DynamicDrawUsage, InstancedBufferAttribute,
-} from 'three';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+} from './three-lite.js';
+import { RoundedBoxGeometry } from './RoundedBoxGeometry.js';
 import { NOISE_GLSL, BUMP_GLSL, CLEAR_TRANSMISSION, CLEAR_BACKPASS, CLEAR_OUTPUT, patch } from './glsl.js';
 import { makeWordmarkTexture, makeRadialTexture, DECAL_ASPECT } from './decal.js';
 import { lerp, rng, vnoise, fbm, smooth, clamp01 } from './util.js';
@@ -16,7 +16,7 @@ export const outerR = (y) => lerp(CUP.rb, CUP.rt, (y - CUP.y0) / (CUP.y1 - CUP.y
 export const innerR = (y) => outerR(y) - 0.016;
 
 export const PAL = {
-  mango: new Color('#F58A06'), mangoDeep: new Color('#D45604'), cream: new Color('#FFB52E'),
+  mango: new Color('#F58A06'), mangoDeep: new Color('#D45604'), cream: new Color('#FFC46A'),
   chamoy: new Color('#560A13'), chamoyHi: new Color('#8A171B'), tajin: new Color('#C93522'),
 };
 
@@ -125,8 +125,8 @@ function sorbetGeometry(rows, cols) {
   const pts = [[0, yb]];
   for (let i = 1; i <= 6; i++) pts.push([lerp(0, innerR(yb) - 0.05, i / 6), yb]);
   for (let i = 1; i <= 6; i++) { const a = (i / 6) * Math.PI / 2; pts.push([innerR(yb + 0.05) - 0.05 * Math.cos(a), yb + 0.05 * Math.sin(a)]); }
-  for (let i = 1; i <= 24; i++) { const y = lerp(yb + 0.05, ys, i / 24); pts.push([innerR(y) - 0.018, y]); }
-  const a0 = innerR(ys) - 0.018;
+  for (let i = 1; i <= 24; i++) { const y = lerp(yb + 0.05, ys, i / 24); pts.push([innerR(y) - 0.03, y]); }
+  const a0 = innerR(ys) - 0.03;
   for (let i = 1; i <= 30; i++) { const a = (i / 30) * Math.PI / 2; pts.push([a0 * Math.cos(a), ys + (peak - ys) * Math.sin(a)]); }
   const prof = profileSampler(pts);
   const pitch = 0.25;
@@ -146,27 +146,29 @@ function sorbetGeometry(rows, cols) {
     const w = wBottom * wTip;
     const n1 = fbm(px0 * 2.6 + 7, o.y * 2.6, pz0 * 2.6, 3);
     // twisted star-nozzle flutes (the swirl) + shallow piped layers + lumps
-    const fc = Math.cos(6 * th + o.L * 5.4 + 1.2 * (n1 - 0.5));
-    const flute = Math.sign(fc) * Math.pow(Math.abs(fc), 0.65);
-    let disp = w * (0.034 * flute + 0.013 * (bp - 1));
-    disp += 0.028 * (n1 - 0.5) * (0.5 + 0.5 * w);
+    // twisted star-nozzle ridges: broad rounded crests, narrow deep folds (where the chamoy collects)
+    const fc = Math.cos(7 * th + o.L * 6.6 + 1.3 * (n1 - 0.5));
+    const crest = Math.pow(0.5 + 0.5 * fc, 0.55);           // 0 = fold … 1 = crest
+    let disp = w * (0.058 * (crest - 0.62) + 0.012 * (bp - 1));
+    disp += 0.024 * (n1 - 0.5) * (0.5 + 0.5 * w);
     const yy = o.y + o.ny * disp;
     // pressed against the PET: never through the wall (flute crests flatten where they touch)
     const r = Math.max(0, Math.min(o.r + o.nr * disp, innerR(Math.min(yy, 1.57)) - 0.006));
     out.x = r * sx; out.z = r * cz; out.y = yy;
-    const coil = Math.floor(phi);
-    const streak = vnoise(coil * 1.7 + 0.3, Math.cos(th) * 1.4 + 3, Math.sin(th) * 1.4 + f * 1.2);
-    const fIdx = Math.floor((6 * th + o.L * 5.4) / (Math.PI * 2) + 0.5);
-    const thr = 0.12 + 0.62 * vnoise(fIdx * 1.31 + 0.5, o.L * 1.6, 2.2);
-    out.e[0] = smooth(clamp01((-fc - thr) / 0.55)) * w; // chamoy rides the flute valleys, unevenly
-    out.e[1] = streak;
+    const fIdx = Math.floor((7 * th + o.L * 6.6) / (Math.PI * 2) + 0.5);
+    const thr = 0.1 + 0.55 * vnoise(fIdx * 1.31 + 0.5, o.L * 1.6, 2.2);
+    out.e[0] = smooth(clamp01((-fc - thr) / 0.5)) * w; // chamoy rides the folds of the swirl, unevenly
+    out.e[1] = 1 - (1 - crest) * w;                      // crest height (tops get paler, folds deeper)
     out.e[2] = clamp01((o.y - yb) / (peak - yb));
     out.e[3] = (1 - b) * w; // layer seams (occlusion only)
   }, 4);
 }
 
 function sorbetMaterial() {
-  const m = new MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.55, specularIntensity: 0.38, sheen: 0.08, sheenColor: new Color('#ff9a20'), sheenRoughness: 0.5, envMapIntensity: 0.22 });
+  const m = new MeshPhysicalMaterial({
+    color: 0xffffff, roughness: 0.55, specularIntensity: 0.42, sheen: 0.1, sheenColor: new Color('#ff9a20'), sheenRoughness: 0.5,
+    clearcoat: 1, clearcoatRoughness: 0.07, envMapIntensity: 0.22,
+  });
   const u = {
     uMango: { value: PAL.mango }, uMangoDeep: { value: PAL.mangoDeep }, uCream: { value: PAL.cream },
     uChamoy: { value: PAL.chamoy }, uTajin: { value: PAL.tajin },
@@ -175,22 +177,37 @@ function sorbetMaterial() {
     uniforms: u,
     vertexHead: 'attribute vec4 aExtra; varying vec4 vSorb; varying vec3 vObj;',
     vertex: { begin_vertex: 'vSorb = aExtra; vObj = position;' },
-    fragmentHead: `${NOISE_GLSL}${BUMP_GLSL}\nvarying vec4 vSorb; varying vec3 vObj; uniform vec3 uMango, uMangoDeep, uCream, uChamoy, uTajin; float zGroove;`,
+    fragmentHead: `${NOISE_GLSL}${BUMP_GLSL}
+      varying vec4 vSorb; varying vec3 vObj; uniform vec3 uMango, uMangoDeep, uCream, uChamoy, uTajin;
+      float zGroove, zCrest, zIce, zAA;`,
     fragment: {
       color_fragment: `
         float nA = zFbm(vObj * 4.0);
         float nB = zNoise(vObj * vec3(9.0, 3.0, 9.0) + 2.0);
-        vec3 sc = mix(uMango, uMangoDeep, smoothstep(0.35, 0.85, nA));
-        sc *= 1.0 - 0.14 * smoothstep(0.45, 0.98, vSorb.w);
-        sc = mix(sc, uCream, smoothstep(0.55, 0.85, vSorb.y) * 0.45 * smoothstep(0.25, 0.75, nB));
-        zGroove = smoothstep(0.32, 0.78, vSorb.x * (0.65 + 0.7 * nB) + 0.35 * vSorb.w * smoothstep(0.55, 0.8, nA));
+        zCrest = vSorb.y;
+        // deeper orange in the folds, mango on the flanks, pale cream-orange on the ridge tops
+        vec3 sc = mix(uMangoDeep * 0.82, uMango, smoothstep(0.05, 0.55, zCrest));
+        sc = mix(sc, uCream, smoothstep(0.6, 0.97, zCrest) * (0.45 + 0.4 * nB));
+        sc *= (0.9 + 0.2 * nA) * (1.0 - 0.12 * smoothstep(0.45, 0.98, vSorb.w));
+        // ice crystals: granular, faded out when they'd be sub-pixel (no shimmer)
+        vec3 cp = vObj * 70.0;
+        zAA = clamp(1.6 - length(fwidth(cp)), 0.0, 1.0);
+        zIce = zNoise(cp) * 0.6 + zNoise(cp * 2.3) * 0.4;
+        sc *= 1.0 + (zIce - 0.5) * 0.16 * zAA;
+        zGroove = smoothstep(0.3, 0.75, vSorb.x * (0.7 + 0.6 * nB));
         sc = mix(sc, uChamoy * (0.75 + 0.5 * nA), zGroove);
         float fl = smoothstep(0.8, 0.86, zNoise(vObj * 64.0)) * (0.2 + 0.8 * max(zGroove, smoothstep(0.7, 1.0, vSorb.z)));
         sc = mix(sc, uTajin * 0.7, fl * 0.85);
         diffuseColor.rgb = sc;`,
-      roughnessmap_fragment: 'roughnessFactor = mix(0.6, 0.12, zGroove) + (zNoise(vObj * 40.0) - 0.5) * 0.18;',
-      normal_fragment_maps: 'normal = zBump(-vViewPosition, normal, (zNoise(vObj * 15.0) * 0.004 + zNoise(vObj * 70.0) * 0.0009) * (1.0 - zGroove * 0.9));',
-      emissivemap_fragment: 'totalEmissiveRadiance += diffuseColor.rgb * 0.13 * (1.0 - zGroove);',
+      roughnessmap_fragment: `
+        roughnessFactor = mix(0.62 - 0.14 * zCrest, 0.1, zGroove) + (zNoise(vObj * 38.0) - 0.5) * 0.2;
+        roughnessFactor = mix(roughnessFactor, 0.2, smoothstep(0.78, 0.92, zIce) * zAA * (1.0 - zGroove)); // frost glints`,
+      normal_fragment_maps: `normal = zBump(-vViewPosition, normal,
+        (zNoise(vObj * 15.0) * 0.004 + (zIce * 0.0026 + zNoise(vObj * 160.0) * 0.0009) * zAA) * (1.0 - zGroove * 0.9));`,
+      lights_physical_fragment: 'material.clearcoat = zGroove; material.clearcoatRoughness = 0.07;',
+      emissivemap_fragment: `
+        float zRim = pow(1.0 - saturate(dot(normal, normalize(vViewPosition))), 2.6);
+        totalEmissiveRadiance += (diffuseColor.rgb * 0.1 + vec3(1.0, 0.42, 0.06) * 0.42 * zRim) * (1.0 - zGroove);`,
     },
   }, 'zaca-sorbet');
 }

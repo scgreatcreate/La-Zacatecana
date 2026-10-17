@@ -1,5 +1,5 @@
 // The cup's printed wordmark as a crisp canvas texture (red ink, like the real cup).
-import { CanvasTexture, SRGBColorSpace, LinearMipmapLinearFilter, LinearFilter } from 'three';
+import { CanvasTexture, SRGBColorSpace, LinearMipmapLinearFilter, LinearFilter } from './three-lite.js';
 import { WORDMARK } from './wordmark-paths.js';
 
 export const DECAL_ASPECT = 2048 / 600;

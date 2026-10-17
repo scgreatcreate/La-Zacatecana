@@ -2,7 +2,7 @@
 // sloshes like a liquid curtain. Drives the DOM clip of the sweet half and the GL chamoy stream.
 const N = 24;
 
-export function createDivider({ split, dulce, handle, onKey }) {
+export function createDivider({ split, dulce, handle, onKey, hint = true }) {
   const x = new Float32Array(N);   // offsets from the base line (css px)
   const v = new Float32Array(N);
   const uv = new Float32Array(N);     // GL stream (with ambient wobble)
@@ -15,7 +15,7 @@ export function createDivider({ split, dulce, handle, onKey }) {
   let lastShift = NaN;
   let lastHandle = '';
 
-  const clampBase = (b) => Math.min(0.84, Math.max(0.16, b));
+  const clampBase = (b) => Math.min(0.73, Math.max(0.27, b));
   function moveBase(nb) {
     nb = clampBase(nb);
     const d = (nb - base) * W;
@@ -55,8 +55,8 @@ export function createDivider({ split, dulce, handle, onKey }) {
     let nb = null;
     if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') nb = base - step;
     else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') nb = base + step;
-    else if (e.key === 'Home') nb = 0.16;
-    else if (e.key === 'End') nb = 0.84;
+    else if (e.key === 'Home') nb = 0.27;
+    else if (e.key === 'End') nb = 0.73;
     if (nb === null) return;
     e.preventDefault();
     moveBase(nb);
@@ -72,7 +72,7 @@ export function createDivider({ split, dulce, handle, onKey }) {
   function setActive(on) {
     if (on === active) return;
     active = on;
-    if (on && !hinted) { hinted = true; impulse(260); }
+    if (on && !hinted) { hinted = true; if (hint) impulse(110); }
   }
 
   // dt: seconds, t: ambient clock (frozen in tests)
@@ -82,7 +82,7 @@ export function createDivider({ split, dulce, handle, onKey }) {
     for (let s = 0; s < sub; s++) {
       for (let i = 0; i < N; i++) {
         const l = x[i > 0 ? i - 1 : 1], r = x[i < N - 1 ? i + 1 : N - 2];
-        let a = -16 * x[i] + 1500 * (l + r - 2 * x[i]) - 3.4 * v[i];
+        let a = -18 * x[i] + 1500 * (l + r - 2 * x[i]) - 4.2 * v[i];
         if (drag) { const k = (i - drag.node) / 3.2; a += -260 * Math.exp(-k * k) * x[i]; }
         v[i] += a * h;
       }
@@ -105,8 +105,16 @@ export function createDivider({ split, dulce, handle, onKey }) {
     pts += `,0 ${H.toFixed(1)}px`;
     const clip = `polygon(${pts})`;
     if (clip !== lastClip) { dulce.style.clipPath = clip; lastClip = clip; }
+    // each half's content is moved + scaled to exactly fill its visible side (never cropped by the line)
     const shift = Math.round((base - 0.5) * W * 0.5 * 2) / 2;
-    if (shift !== lastShift) { split.style.setProperty('--hc-shift', shift + 'px'); split.style.setProperty('--hc-div-x', shift * 2 + 'px'); lastShift = shift; }
+    if (shift !== lastShift) {
+      const sd = Math.min(1.1, Math.max(0.54, base / 0.5)), sp = Math.min(1.1, Math.max(0.54, (1 - base) / 0.5));
+      split.style.setProperty('--hc-shift', shift + 'px');
+      split.style.setProperty('--hc-div-x', shift * 2 + 'px');
+      split.style.setProperty('--hc-sd', sd.toFixed(4));
+      split.style.setProperty('--hc-sp', sp.toFixed(4));
+      lastShift = shift;
+    }
     const gi = Math.round(((svh * 0.5) / H) * (N - 1));
     const ht = `translate3d(${cx[gi]}px,0,0)`;
     if (ht !== lastHandle) { handle.style.transform = ht; lastHandle = ht; }

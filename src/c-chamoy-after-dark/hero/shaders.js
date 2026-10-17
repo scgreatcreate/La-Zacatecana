@@ -63,6 +63,15 @@ void main () {
   o = r;
 }`);
 
+// viscosity: one Jacobi step of velocity diffusion (kills smoke-like curls, keeps the syrup laminar)
+export const VISCOUS = FS(`
+uniform sampler2D uVelocity; uniform float uA;
+void main () {
+  vec2 c = texture(uVelocity, vUv).xy;
+  vec2 s = texture(uVelocity, vL).xy + texture(uVelocity, vR).xy + texture(uVelocity, vT).xy + texture(uVelocity, vB).xy;
+  o = vec4((c + uA * s) / (1.0 + 4.0 * uA), 0.0, 1.0);
+}`);
+
 export const CURL = FS(`
 uniform sampler2D uVelocity;
 void main () {
@@ -323,25 +332,31 @@ void main () {
   float lip = uLevel < 1.03 ? 1.15 * exp(-max(below, 0.0) / 15.0) : 0.0;
   vec2 glip = vec2(dFdx(lip), dFdy(lip)) * uPx;
   // drips: rivulets left behind on the glass while it drains (attached to the meniscus = pure f(scroll))
-  float cw = 31.0 * uDripS;
+  // residue on the glass while it drains (attached to the meniscus = pure f(scroll)):
+  // tapering rivulets, round beads and a thin wet film
+  float cw = 27.0 * uDripS;
   float ci = floor(cpx.x / cw);
-  float r0 = hash2(vec2(ci, 3.7)), r1 = hash2(vec2(ci, 9.1)), r2 = hash2(vec2(ci, 1.3));
+  float r0 = hash2(vec2(ci, 3.7)), r1 = hash2(vec2(ci, 9.1)), r2 = hash2(vec2(ci, 1.3)), r3 = hash2(vec2(ci, 5.9));
   float dH = 0.0;
-  if (r0 > 0.38 && uDrip > 0.0) {
-    float L = (10.0 + 62.0 * r1 * r1) * uDrip * uDripS; // rivulet length (css px)
-    float w = (2.2 + 2.6 * r2) * uDripS;                // neck half-width
-    float bulb = w * 1.55;                              // rounded drop at the trailing end
-    float cx = (ci + 0.5 + (r2 - 0.5) * 0.4) * cw;
+  if (uDrip > 0.0) {
+    float cx = (ci + 0.5 + (r2 - 0.5) * 0.5) * cw;
     float ddx = cpx.x - cx;
-    float t = clamp(up / max(L, 1.0), 0.0, 1.0);
-    float hw2 = mix(w * 1.25, w * 0.8, t) + 7.0 * uDripS * exp(-max(up, 0.0) / (5.0 * uDripS));   // fillet
-    float k = 1.0 - ddx * ddx / (hw2 * hw2);
-    float by = L - bulb * 0.4;                          // drop centre
-    float dy = up - by;
-    float kb = 1.0 - (ddx * ddx + dy * dy) / (bulb * bulb);
-    k = up < by ? k : -1.0;
-    dH = max(max(k, kb), 0.0) * step(-1.0, up);
+    if (r0 > 0.45) {                                     // rivulet: wide at the surface, thread-thin at the top
+      float L = (16.0 + 90.0 * r1 * r1) * uDrip * uDripS;
+      float t = clamp(up / max(L, 1.0), 0.0, 1.0);
+      float hw = (1.0 + 2.0 * r2) * uDripS * (1.0 - t) + 6.0 * uDripS * exp(-max(up, 0.0) / (4.0 * uDripS));
+      dH = max(dH, (1.0 - ddx * ddx / max(hw * hw, 0.01)) * step(-1.0, up) * step(up, L) * (1.0 - 0.6 * t));
+    }
+    if (r3 > 0.35) {                                     // bead left behind on the glass
+      float by = (10.0 + 120.0 * hash2(vec2(ci, 7.3))) * uDrip * uDripS;
+      float br = (1.8 + 3.2 * hash2(vec2(ci, 2.1))) * uDripS;
+      float bx = cx + (r1 - 0.5) * cw * 0.6;
+      vec2 q = vec2(cpx.x - bx, (up - by) * 0.82);
+      dH = max(dH, 1.0 - dot(q, q) / (br * br));
+    }
+    dH = max(dH, 0.0);
   }
+  float film = uDrip * exp(-max(up, 0.0) / (22.0 * uDripS)) * step(0.0, up) * 0.5;
   vec2 gdrip = vec2(dFdx(dH), dFdy(dH)) * uPx;
 
   // ----------------------------------------------------------- A · the night, under the meniscus
@@ -393,7 +408,7 @@ void main () {
     float sA = smoothstep(1.0 + 1.2 / hw, 1.0 - 1.2 / hw, abs(s)) * uStream.y;
     float sH = sqrt(max(1.0 - s * s, 0.0)) * 1.3;
     float dA = smoothstep(0.0, 0.12, dH);
-    float a = max(sA, dA);
+    float a = max(max(sA, dA), film * 0.55);
     if (a > 0.0) {
       vec3 n;
       float Hh;
@@ -406,6 +421,7 @@ void main () {
       vec2 sc = vec2(dx / 2.2, (cpx.y + uTime * 150.0) / 2.6);
       float sp = step(0.94, hash2(floor(sc))) * sA * smoothstep(0.85, 0.3, abs(s));
       c = mix(c, vec3(0.85, 0.30, 0.15), sp * 0.85);
+      if (max(sA, dA) < film * 0.55) c = mix(DEEP, CHAMOY, 0.6) * 0.9 + vec3(0.25, 0.1, 0.12) * exp(-max(up, 0.0) / 3.0);
       B = vec4(c * a, a);
     }
   }

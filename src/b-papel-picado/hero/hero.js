@@ -91,14 +91,16 @@ function boot() {
   ScrollTrigger.config({ ignoreMobileResize: true });
 
   // ---- loop
-  let running = false, visible = true, pageVisible = !document.hidden, last = 0, tSim = 0;
+  let running = false, visible = true, pageVisible = !document.hidden, last = 0, tSim = 0, held = false;
   function frame(now) {
     raf = 0;
     if (!running || !sceneApi) return;
-    const dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016);
+    const rawDt = last ? (now - last) / 1000 : 0.016;
+    const dt = Math.min(0.05, rawDt);
     last = now;
-    // ease toward the scroll target (converges exactly; same state up or down)
-    const k = 1 - Math.exp(-dt * 11);
+    // ease toward the scroll target (converges exactly; same state up or down). Slow devices catch up in
+    // fewer, larger steps so a still frame is always the scroll state within a few frames.
+    const k = 1 - Math.exp(-Math.min(0.25, rawDt) * 12);
     api.p += (api.target - api.p) * k;
     if (Math.abs(api.target - api.p) < 1e-4) api.p = api.target;
     // ambient wind: base + scroll velocity (touch devices get their gusts from scrolling)
@@ -123,15 +125,16 @@ function boot() {
     raf = requestAnimationFrame(frame);
   }
   function setRunning() {
-    const should = visible && pageVisible && !!sceneApi && !api.static;
+    const should = visible && pageVisible && !!sceneApi && !api.static && !held;
     if (should && !running) { running = true; last = 0; raf = requestAnimationFrame(frame); }
     else if (!should && running) { running = false; cancelAnimationFrame(raf); raf = 0; }
   }
 
   api.settled = () => api.ready && Math.abs(api.target - api.p) < 1e-4;
+  api.hold = (on) => { held = !!on; setRunning(); }; // dev: freeze the loop (poster capture)
   api.info = () => (sceneApi ? sceneApi.info() : null);
 
-  canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); goStatic('context-lost'); }, false);
+  canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); if (!api.static) goStatic('context-lost'); }, false);
 
   const copyRect = () => {
     if (!copy) return null;
@@ -142,7 +145,7 @@ function boot() {
     return { left: rr.left - s.left, right: rr.right - s.left, top: rr.top - s.top, bottom: rr.bottom - s.top, width: r.width };
   };
 
-  createScene({ canvas, stage, phone, getCopyRect: copyRect, assetBase: section.dataset.assetBase || 'assets/' }).then((s) => {
+  createScene({ canvas, stage, phone, getCopyRect: copyRect, assetBase: section.dataset.assetBase || 'assets/', hiDpi: q.has('hidpi') }).then((s) => {
     sceneApi = s;
     if (api.static) { s.dispose(); sceneApi = null; return; }
     st = ScrollTrigger.create({

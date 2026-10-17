@@ -1,23 +1,23 @@
 // Choreography: pure functions of hero progress p ∈ [0,1]. Time t only adds ambient motion on top.
-import { Matrix4, Quaternion, Euler, Vector3 } from 'three';
+import { Matrix4, Quaternion, Euler, Vector3 } from './three-lite.js';
 import { seg, smooth, smoother, lerp, DEG, clamp01 } from './util.js';
 
 export const PIN_P = 0.85; // p reached when the CSS pin ends; the rest is the un-pinned landing tail
 
 // explode (ex) / reassemble (as) windows. Top comes off first; rebuild goes bottom-up, lid snaps last.
 export const W = {
-  lid:    { ex: [0.04, 0.25], as: [0.705, 0.80] },
-  straw:  { ex: [0.035, 0.27], as: [0.70, 0.795] },
-  band:   { ex: [0.07, 0.29], as: [0.675, 0.77] },
-  tajin:  { ex: [0.10, 0.34], as: [0.645, 0.745] },
-  cubes:  { ex: [0.13, 0.37], as: [0.62, 0.72] },
-  sorbet: { ex: [0.16, 0.42], as: [0.595, 0.695] },
-  chamoy: { ex: [0.19, 0.46], as: [0.57, 0.665] },
+  lid:    { ex: [0.035, 0.205], as: [0.705, 0.80] },
+  straw:  { ex: [0.03, 0.22], as: [0.70, 0.795] },
+  band:   { ex: [0.058, 0.24], as: [0.675, 0.77] },
+  tajin:  { ex: [0.082, 0.275], as: [0.645, 0.745] },
+  cubes:  { ex: [0.106, 0.305], as: [0.62, 0.72] },
+  sorbet: { ex: [0.13, 0.335], as: [0.595, 0.695] },
+  chamoy: { ex: [0.155, 0.365], as: [0.57, 0.665] },
 };
 export const T = {
-  copyOut: [0.012, 0.085], toApart: [0.03, 0.31], toWhole: [0.56, 0.80], land: [0.858, 0.974],
+  copyOut: [0.012, 0.085], toApart: [0.03, 0.27], toWhole: [0.56, 0.80], land: [0.858, 0.974],
   fresh: [0.715, 0.875], callOut: [0.535, 0.572], photo: [0.962, 1.0],
-  apartIn: [0.27, 0.33], apartOut: [0.53, 0.57], wholeIn: [0.665, 0.72], wholeOut: [0.83, 0.857],
+  apartIn: [0.235, 0.29], apartOut: [0.53, 0.57], wholeIn: [0.665, 0.72], wholeOut: [0.83, 0.857],
 };
 
 /** travel out: machined, symmetric ease */
@@ -164,12 +164,15 @@ export function applyPose(P, p, t, still) {
 }
 
 /** DOM opacities, all pure functions of p */
-export function domState(p) {
+export function domState(p, narrow) {
   const fade = (a, b) => smooth(seg(p, a, b));
+  // desktop: the chapter takes over the left column the moment the intro copy has gone (no dead frames);
+  // phones: it waits until the lid + straw have flown past the title band
+  const aIn = narrow ? T.apartIn : [0.085, 0.15];
   return {
     copy: 1 - fade(T.copyOut[0], T.copyOut[1]),
     cue: 1 - fade(0, 0.03),
-    apart: fade(T.apartIn[0], T.apartIn[1]) * (1 - fade(T.apartOut[0], T.apartOut[1])),
+    apart: fade(aIn[0], aIn[1]) * (1 - fade(T.apartOut[0], T.apartOut[1])),
     whole: fade(T.wholeIn[0], T.wholeIn[1]) * (1 - fade(T.wholeOut[0], T.wholeOut[1])),
     photo: fade(T.photo[0], T.photo[1]),
     callOut: 1 - fade(T.callOut[0], T.callOut[1]),
