@@ -88,7 +88,7 @@ export function favorites({ sizes = '(min-width: 1180px) 300px, (min-width: 720p
     const it = byName(name); if (!it) throw new Error('favorite missing ' + name);
     const img = srcset(it);
     const flip = flipFirst && i === 0 ? ` data-flip-target="${it.id}"` : '';
-    return `<article class="fav reveal"${flip} data-id="${it.id}" style="--i:${i}${it.tint ? `;--tint:${it.tint.join(' ')}` : ''}">
+    return `<article class="fav${flip ? '' : ' reveal'}"${flip} data-id="${it.id}" style="--i:${i}${it.tint ? `;--tint:${it.tint.join(' ')}` : ''}">
       <div class="fav__media${flip ? ' flip-slot' : ''}">
         ${img ? `<img src="${img.src}" srcset="${img.srcset}" sizes="${sizes}" width="${img.max}" height="${img.max}" alt="${esc(altText(it))}" data-alt-es="${esc(altText(it, 'es'))}" loading="lazy" decoding="async">` : ''}
       </div>

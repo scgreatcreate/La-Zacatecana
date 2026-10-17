@@ -27,3 +27,10 @@
 18. A gloved hand was erased from *Waffle de Burbuja*; the selfie-wall photo is cropped to the neon + grass only (the original shows a hand and a video-player UI).
 19. Interior photos got a gentle warm/pastel grade (+4 % brightness, −5 % saturation, slightly warmer), per your note that the walls read warmer and more pastel in person. They're used small, as framed postcards, so the Aug-2024 emptiness isn't the vibe.
 20. Zacatecas outline from **Natural Earth** admin-1 data (public domain) rather than guessing the shape. Logo and wordmark are redrawn as SVG from the photos (Pacifico / Fredoka stand-ins for their lettering) → the owner must supply originals.
+
+## Heroes (integration)
+21. **Hero A drops GSAP/ScrollTrigger** for a ~60-line native scroll-progress reader (same reversibility, ignores iOS URL-bar resizes) and a trimmed, vendored three.js subset (pixel-identical frames). This took the hero bundle from 706 kB to 446 kB (127 kB gzipped). B and C use GSAP ScrollTrigger as briefed.
+22. **Hero A's callouts are numbered in build order** (01 Chamoy → 05 Banderilla), the order a mangonada is assembled; numbering there encodes a real sequence.
+23. **Hero A's FLIP** fits the 3D cup to the alpha bounds of the real photo in the Mangonada card, so the landing matches the photo's cup, then crossfades to the photo. That card is excluded from the scroll-reveal so it's already in place when the cup lands.
+24. **Hero C's spicy side** shows mangonada, esquite con Hot Cheetos and sandifresa; the Takis cup photo looked almost identical to the Hot Cheetos cup, so it wasn't repeated. The fluid simulation is adapted from PavelDoGreat/WebGL-Fluid-Simulation (MIT, notice kept in `LICENSE-fluid.txt` and in the shader header).
+25. **The no-JS / no-WebGL / reduced-motion state** of every hero is a designed static frame (A and B use a poster rendered from their own scene; C uses CSS/SVG neon and a frozen pour).
