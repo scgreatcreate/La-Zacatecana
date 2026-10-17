@@ -237,6 +237,8 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
     const src = L.img && (L.img.currentSrc || L.img.src);
     if (!src || src === scanned) return;
     scanned = src;
+    const bb = L.img.dataset && L.img.dataset.bbox;
+    if (bb) { const [x0, y0, x1, y1] = bb.split(' ').map(Number); Object.assign(photoBox, { x0, y0, x1, y1 }); return; }
     const im = new Image();
     im.decoding = 'async';
     im.src = src;

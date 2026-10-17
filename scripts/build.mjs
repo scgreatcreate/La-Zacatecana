@@ -72,6 +72,9 @@ window.LZ_ORDER_CONFIG = ${JSON.stringify({ ...ORDER_CONFIG, itemUrl: null }, nu
   copyDir(path.join(root, 'assets/shop'), path.join(out, 'assets/shop'), (f) => f.endsWith('.webp'));
   copyDir(path.join(root, 'assets/brand'), path.join(out, 'brand'), (f) => f.endsWith('.svg'));
   copyDir(path.join(src, 'hero/assets'), path.join(out, 'hero-assets'));
+  // file:// fallback for WebGL textures (Chrome blocks file images in WebGL): same image as a data URI
+  const prod = path.join(out, 'hero-assets/products.webp');
+  if (fs.existsSync(prod)) fs.writeFileSync(path.join(out, 'hero-assets/products.data.js'), `window.__LZ_B_PRODUCTS="data:image/webp;base64,${fs.readFileSync(prod).toString('base64')}";\n`);
   copyDir(path.join(src, 'static'), out);
   fs.copyFileSync(path.join(root, 'assets/brand/logo-round.svg'), path.join(out, 'favicon.svg'));
   await sharp(path.join(root, 'assets/brand/logo-round.svg')).resize(512, 512).png().toFile(path.join(out, 'logo.png'));

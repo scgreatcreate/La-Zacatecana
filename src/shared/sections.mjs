@@ -7,6 +7,14 @@ import { esc, tx, bi, menuCard, moodChip, money, srcset, altText, pickWidths } f
 import { ico } from './icons.mjs';
 
 export const byName = (n) => ITEMS.find((i) => i.es === n);
+// where the product sits inside its square photo (same framing rules as scripts/process-photos.mjs)
+const PHOTO_MANIFEST = JSON.parse(fs.readFileSync(new URL('../../assets/menu/manifest.json', import.meta.url), 'utf8'));
+const bboxAttr = (it) => {
+  const m = PHOTO_MANIFEST[it.id]; if (!m) return '';
+  const [w, h] = m.product, side = m.side, left = Math.round((side - w) / 2), top = Math.max(0, Math.round(side * 0.94 - h));
+  const f = (v) => (v / side).toFixed(4);
+  return ` data-bbox="${f(left)} ${f(top)} ${f(left + w)} ${f(top + h)}"`;
+};
 const ORD = ORDER_CONFIG.defaultUrl;
 export const orderAttrs = (kind = 'default') => {
   const href = kind === 'pickup' ? ORDER_CONFIG.pickupUrl : kind === 'delivery' ? ORDER_CONFIG.deliveryUrl : ORD;
@@ -90,7 +98,7 @@ export function favorites({ sizes = '(min-width: 1180px) 300px, (min-width: 720p
     const flip = flipFirst && i === 0 ? ` data-flip-target="${it.id}"` : '';
     return `<article class="fav${flip ? '' : ' reveal'}"${flip} data-id="${it.id}" style="--i:${i}${it.tint ? `;--tint:${it.tint.join(' ')}` : ''}">
       <div class="fav__media${flip ? ' flip-slot' : ''}">
-        ${img ? `<img src="${img.src}" srcset="${img.srcset}" sizes="${sizes}" width="${img.max}" height="${img.max}" alt="${esc(altText(it))}" data-alt-es="${esc(altText(it, 'es'))}" loading="lazy" decoding="async">` : ''}
+        ${img ? `<img src="${img.src}" srcset="${img.srcset}" sizes="${sizes}" width="${img.max}" height="${img.max}" alt="${esc(altText(it))}" data-alt-es="${esc(altText(it, 'es'))}"${bboxAttr(it)} loading="lazy" decoding="async">` : ''}
       </div>
       <div class="fav__body">
         ${badge === 'mostLiked' ? tx('badgeMostLiked', 'span', 'class="fav__badge fav__badge--hot"') : tx('badgeFeatured', 'span', 'class="fav__badge"')}

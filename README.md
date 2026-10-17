@@ -13,7 +13,9 @@ Pitch board comparing all three: https://claude.ai/artifact/XWqLmMuF9efGFBXTS2Q9
 The previews are private to your claude.ai account until you share them from each page's Share menu.
 
 ## Open offline
-Every `directions/<name>/` folder is self-contained (fonts, images and scripts bundled, no CDN). Double-click its `index.html`. The only things that need internet are the Order/social links and the optional "Show the map" button.
+**Double-click `START-HERE.html`** in the repo folder. It shows all three directions side by side with an "Open" button for each.
+
+Every `directions/<name>/` folder is self-contained (fonts, images and scripts bundled, no CDN), so each `index.html` also opens on its own straight from disk. Use Chrome or Edge. The only things that need internet are the Order/social links and the optional "Show the map" button.
 
 To test on a phone from your Windows PC on the same Wi-Fi: open Command Prompt in the repo folder and run `npx serve directions`. Then on the phone open `http://<your-PC-IP>:3000/a-mangonada/` (find the IP with `ipconfig`).
 

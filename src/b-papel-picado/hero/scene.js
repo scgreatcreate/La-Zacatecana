@@ -270,7 +270,14 @@ export async function createScene({ canvas, stage, getCopyRect, phone, assetBase
       products.visible = true;
       counterU.uProdOn.value = 1;
     };
-    img.src = assetBase + 'products.webp';
+    // Opened straight from disk (file://), Chrome won't upload file images to WebGL, so the build
+    // also ships the same image as a data URI in products.data.js; load that instead.
+    if (location.protocol === 'file:') {
+      const sc = document.createElement('script');
+      sc.src = assetBase + 'products.data.js';
+      sc.onload = () => { if (window.__LZ_B_PRODUCTS) img.src = window.__LZ_B_PRODUCTS; };
+      document.head.appendChild(sc);
+    } else img.src = assetBase + 'products.webp';
   }
 
   const blurU = { uTex: { value: shA }, uDir: { value: [1, 0] } };

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Zacatecana · Pick a direction</title>
+<style>
+  /* One screen to pick a direction. Cream ground, the brand's magenta, each card tinted like its direction. */
+  :root {
+    --bg: #FFF8EE; --ink: #3A1424; --ink-2: #6B4655; --brand: #C2185B; --line: rgb(58 20 36 / .14);
+    --a: #FCE3E9; --b: #FFE9A3; --c: #1A0E1C; --c-ink: #FFF1E6; --c-ink-2: #D2BCC8;
+    --font: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 var(--font); }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 40px max(16px, 3vw) 56px; }
+  .kicker { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); }
+  h1 { margin: 8px 0 10px; font-size: clamp(32px, 5vw, 56px); line-height: 1.02; letter-spacing: -0.03em; text-wrap: balance; }
+  .lede { margin: 0; max-width: 62ch; color: var(--ink-2); font-size: 17px; }
+  .tips { margin: 18px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+  .tips li { padding: 6px 12px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); font-size: 14px; font-weight: 600; }
+  .grid { margin-top: 32px; display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .card { display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 26px; background: var(--a); }
+  .card--b { background: var(--b); box-shadow: 0 0 0 3px var(--ink); }
+  .card--c { background: var(--c); color: var(--c-ink); }
+  .card h2 { margin: 0; font-size: 26px; letter-spacing: -0.02em; display: flex; gap: 10px; align-items: baseline; }
+  .card h2 span { color: var(--brand); font-size: 34px; }
+  .card--c h2 span { color: #FF6BB0; }
+  .card p { margin: 0; font-size: 15px; }
+  .card .muted { color: var(--ink-2); }
+  .card--c .muted { color: var(--c-ink-2); }
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .shots img { width: 100%; height: auto; border-radius: 14px; display: block; box-shadow: 0 10px 22px -14px rgb(0 0 0 / .6); }
+  .badge { align-self: flex-start; padding: 4px 10px; border-radius: 999px; background: var(--ink); color: #F7C815; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .open { margin-top: auto; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 999px; background: var(--brand); color: #fff; font-weight: 700; font-size: 17px; text-decoration: none; box-shadow: 0 3px 0 #7A0F38; transition: transform .18s ease-out; }
+  .open:hover { transform: translateY(-2px); }
+  .open:active { transform: translateY(2px); box-shadow: none; }
+  .card--b .open { background: var(--ink); box-shadow: 0 3px 0 #000; }
+  .card--c .open { background: #FF4FA3; color: #1A0710; box-shadow: 0 3px 0 #8A1F55; }
+  .alt { font-size: 13px; text-align: center; }
+  .alt a { color: inherit; }
+  :focus-visible { outline: 3px solid #1D4ED8; outline-offset: 3px; }
+  footer { margin-top: 36px; font-size: 14px; color: var(--ink-2); }
+  footer a { color: var(--brand); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">La Zacatecana Gourmet Ice Cream Shop &amp; Mex Snacks · Acworth, GA</p>
+  <h1>Pick a direction</h1>
+  <p class="lede">Three complete websites with the same menu, craving finder, ordering and visit info. They differ in the opening scroll and the look. Open one, then <strong>scroll slowly through the top of the page</strong>: that's the show.</p>
+  <ul class="tips">
+    <li>Best in Chrome or Edge</li>
+    <li>Try it narrow too (phone size)</li>
+    <li>EN / ES switch in the top bar</li>
+  </ul>
+
+  <div class="grid">
+    <article class="card">
+      <h2><span>A</span> La Mangonada, Desarmada</h2>
+      <div class="shots">
+        <img src="directions/start-here/a-m0.jpg" alt="Direction A on a phone: tagline and a 3D Mangonada cup">
+        <img src="directions/start-here/a-m100.jpg" alt="Direction A after scrolling: the cup rebuilt">
+      </div>
+      <p>A 3D Mangonada comes apart into its ingredients as you scroll, rebuilds, then lands in its menu card.</p>
+      <p class="muted">Best at a premium product moment. Shows one item rather than the variety.</p>
+      <a class="open" href="directions/a-mangonada/index.html">Open A</a>
+      <p class="alt muted">or the <a href="https://claude.ai/artifact/BTFSh6dA99Fhw1Z1z4j8HE">web preview</a></p>
+    </article>
+
+    <article class="card card--b">
+      <span class="badge">My pick</span>
+      <h2><span>B</span> Papel Picado</h2>
+      <div class="shots">
+        <img src="directions/start-here/b-m0.jpg" alt="Direction B on a phone: papel picado over pink stone with the tagline">
+        <img src="directions/start-here/b-m100.jpg" alt="Direction B after scrolling: the yellow logo wall over the pink counter">
+      </div>
+      <p>Papel picado over pink Zacatecas stone lifts like a curtain; you move through to their yellow logo wall and pink counter.</p>
+      <p class="muted">Feels like their shop and sells the 100+ variety. Less tech "wow" than C.</p>
+      <a class="open" href="directions/b-papel-picado/index.html">Open B</a>
+      <p class="alt muted">or the <a href="https://claude.ai/artifact/8vrcKnVKhaEuTKmS9AXifo">web preview</a></p>
+    </article>
+
+    <article class="card card--c">
+      <h2><span>C</span> Chamoy After Dark</h2>
+      <div class="shots">
+        <img src="directions/start-here/c-m0.jpg" alt="Direction C on a phone: neon La Zacatecana over the night storefront">
+        <img src="directions/start-here/c-m100.jpg" alt="Direction C after scrolling: the sweet or spicy split">
+      </div>
+      <p>A neon sign flickers on, live chamoy you can stir pours over it, then drains into a "¿Dulce o picante?" split.</p>
+      <p class="muted">The biggest wow. A night mood, and the heaviest on older phones.</p>
+      <a class="open" href="directions/c-chamoy-after-dark/index.html">Open C</a>
+      <p class="alt muted">or the <a href="https://claude.ai/artifact/GNcETmyivf5gJaMwqiQhW6">web preview</a></p>
+    </article>
+  </div>
+
+  <footer>
+    <p>Owner checklist: <a href="CHECKLIST.md">CHECKLIST.md</a> · Photos to upscale or reshoot: <a href="PHOTOS_TODO.md">PHOTOS_TODO.md</a> · How it was built: <a href="README.md">README.md</a></p>
+  </footer>
+</div>
+</body>
+</html>
