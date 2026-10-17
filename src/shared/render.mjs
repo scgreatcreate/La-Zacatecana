@@ -21,9 +21,18 @@ export function moodsOf(item) {
   return MOODS.filter((m) => (m.tags || []).some((t) => item.tags.includes(t)) || (m.categories || []).includes(item.cat)).map((m) => m.id);
 }
 
-export function srcset(item, base = 'assets/menu') {
+// Only the sizes a layout needs at 2x: menu cards ≈ 232 px → 360/640; favourites ≈ 300 px → +800;
+// an item whose native size is smaller than that ships its native size instead (never upscaled).
+export function pickWidths(all, maxW = 640) {
+  const want = [360, 640, 800].filter((w) => w <= maxW);
+  const ws = all.filter((w) => want.includes(w));
+  const native = all[all.length - 1];
+  if (native < maxW && !ws.includes(native)) ws.push(native);
+  return ws.length ? ws.sort((a, b) => a - b) : [native];
+}
+export function srcset(item, base = 'assets/menu', maxW = 640) {
   if (!item.photo) return null;
-  const ws = item.photo.widths;
+  const ws = pickWidths(item.photo.widths, maxW);
   return {
     src: `${base}/${item.id}-${ws.find((w) => w >= 360) ?? ws[ws.length - 1]}.webp`,
     srcset: ws.map((w) => `${base}/${item.id}-${w}.webp ${w}w`).join(', '),

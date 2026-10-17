@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { ITEMS } from './menu-data.mjs';
 import { ORDER_CONFIG, BUSINESS, LINKS, REVIEWS, FAVORITES, MOODS, CATEGORY_ORDER } from './config.mjs';
 import { T, CATEGORY_NAMES } from './i18n.mjs';
-import { esc, tx, bi, menuCard, moodChip, money, srcset, altText } from './render.mjs';
+import { esc, tx, bi, menuCard, moodChip, money, srcset, altText, pickWidths } from './render.mjs';
 import { ico } from './icons.mjs';
 
 export const byName = (n) => ITEMS.find((i) => i.es === n);
@@ -86,7 +86,7 @@ export function header({ wordmark }) {
 export function favorites({ sizes = '(min-width: 1180px) 300px, (min-width: 720px) 34vw, 72vw', flipFirst = false, eyebrowExtra = '' } = {}) {
   const cards = FAVORITES.map(({ name, badge }, i) => {
     const it = byName(name); if (!it) throw new Error('favorite missing ' + name);
-    const img = srcset(it);
+    const img = srcset(it, 'assets/menu', 800);
     const flip = flipFirst && i === 0 ? ` data-flip-target="${it.id}"` : '';
     return `<article class="fav${flip ? '' : ' reveal'}"${flip} data-id="${it.id}" style="--i:${i}${it.tint ? `;--tint:${it.tint.join(' ')}` : ''}">
       <div class="fav__media${flip ? ' flip-slot' : ''}">
@@ -125,8 +125,8 @@ export function antojo({ cardSizes, machineDeco = '', beforeHead = '' } = {}) {
   const photoItems = ITEMS.filter((i) => i.photo);
   const reel = photoItems.map((it) => {
     const img = srcset(it);
-    const ws = it.photo.widths.filter((w) => w <= 480);
-    return `<li class="reel__item" data-id="${it.id}"><img src="assets/menu/${it.id}-240.webp" srcset="${ws.map((w) => `assets/menu/${it.id}-${w}.webp ${w}w`).join(', ')}" sizes="176px" width="240" height="240" alt="" loading="lazy" decoding="async"></li>`;
+    const w = pickWidths(it.photo.widths, 360)[0];
+    return `<li class="reel__item" data-id="${it.id}"><img src="assets/menu/${it.id}-${w}.webp" width="${w}" height="${w}" alt="" loading="lazy" decoding="async"></li>`;
   }).join('');
   const groups = CATEGORY_ORDER.map((cat) => {
     const items = ITEMS.filter((i) => i.cat === cat);

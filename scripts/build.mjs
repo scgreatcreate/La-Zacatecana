@@ -67,7 +67,7 @@ window.LZ_ORDER_CONFIG = ${JSON.stringify({ ...ORDER_CONFIG, itemUrl: null }, nu
 `);
 
   // 4) assets (only what the page uses)
-  copyDir(path.join(root, 'assets/menu/web'), path.join(out, 'assets/menu'));
+  // menu photos are copied after the HTML is written: only the sizes the page actually references
   copyDir(path.join(root, 'assets/menu/pm'), path.join(out, 'assets/menu/pm'));
   copyDir(path.join(root, 'assets/shop'), path.join(out, 'assets/shop'), (f) => f.endsWith('.webp'));
   copyDir(path.join(root, 'assets/brand'), path.join(out, 'brand'), (f) => f.endsWith('.svg'));
@@ -84,6 +84,9 @@ window.LZ_ORDER_CONFIG = ${JSON.stringify({ ...ORDER_CONFIG, itemUrl: null }, nu
   const page = (await import(pathToFileURL(path.join(src, 'page.mjs')) + `?t=${Date.now()}`)).default;
   const html = page({ heroHtml, dir });
   fs.writeFileSync(path.join(out, 'index.html'), html);
+  const used = new Set([...html.matchAll(/assets\/menu\/([a-z0-9-]+-\d+\.webp)/g)].map((m) => m[1]));
+  fs.mkdirSync(path.join(out, 'assets/menu'), { recursive: true });
+  for (const f of used) fs.copyFileSync(path.join(root, 'assets/menu/web', f), path.join(out, 'assets/menu', f));
 
   const size = (f) => (fs.existsSync(path.join(out, f)) ? (fs.statSync(path.join(out, f)).size / 1024).toFixed(0) + ' kB' : '—');
   console.log(`✓ ${dir}  html ${size('index.html')} · app.js ${size('app.js')} · app.css ${size('app.css')} · hero.js ${size('hero.js')}  (${Date.now() - t0} ms)`);
