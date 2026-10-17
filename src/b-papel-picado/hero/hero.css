@@ -6,7 +6,7 @@
   --hb-ink: #2B1020;
   --hb-cantera: #E7A9AE;
   --hb-magenta: #D6246E;
-  --hb-chamoy: #A3182E;
+  --hb-chamoy: #8C1026;          /* deep chamoy: ≥3:1 even over joints, ~4.6:1 typical on cantera */
   --hb-sun: #F7C815;
   --hb-cream: #FFF6E8;
   position: relative;
@@ -67,7 +67,10 @@
   width: min(40rem, 47vw);
   pointer-events: auto;
   will-change: transform, opacity;
+  /* a soft plaster-light halo lifts the stone joints and pores right behind the glyphs */
+  text-shadow: 0 0 2px rgba(255, 238, 234, 0.7), 0 0 10px rgba(255, 236, 230, 0.55);
 }
+.hero--b .hero-b__order { text-shadow: none; }
 .hero--b .hero-b__vh {
   position: absolute;
   width: 1px; height: 1px;
