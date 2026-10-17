@@ -26,11 +26,10 @@
 }
 body { background: var(--bg); }
 
-/* numbered hairline labels — the exploded-view callout language carried into the page */
-.dir-a main { counter-reset: sec; }
-.dir-a .sec-head .eyebrow { color: var(--ink); letter-spacing: .16em; }
-.dir-a .sec-head .eyebrow::before { counter-increment: sec; content: counter(sec, decimal-leading-zero); color: var(--brand); font-variant-numeric: tabular-nums; }
-.dir-a .sec-head .eyebrow::after { content: ""; width: 56px; height: 1px; background: currentColor; opacity: .5; }
+/* hairline labels — the exploded-view callout line carried into the page (a dot + rule, like the hero's callouts) */
+.dir-a .eyebrow { color: var(--ink); letter-spacing: .16em; }
+.dir-a .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--brand); }
+.dir-a .eyebrow::after { content: ""; width: 56px; height: 1px; background: currentColor; opacity: .5; }
 .dir-a .sec-title { font-size: clamp(38px, 8vw, 84px); line-height: .96; }
 
 /* header */

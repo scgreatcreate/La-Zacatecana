@@ -1,0 +1,10 @@
+import sharp from 'sharp'; import fs from 'node:fs'; import path from 'node:path';
+const [dir, vp, out] = process.argv.slice(2);
+const order = ['hero', 'favoritos', 'antojo', 'menu', 'tienda', 'resenas', 'visita', 'pedir', 'contacto'];
+const files = order.map((n) => path.join('review', dir, `sec-${vp}-${n}.png`)).filter((f) => fs.existsSync(f));
+const H = vp === 'm' ? 760 : 420;
+const bufs = await Promise.all(files.map((f) => sharp(f).resize({ height: H }).toBuffer()));
+const metas = await Promise.all(bufs.map((b) => sharp(b).metadata()));
+const cols = vp === 'm' ? 9 : 3; const W = metas[0].width;
+const comps = bufs.map((b, i) => ({ input: b, left: (i % cols) * (W + 8), top: Math.floor(i / cols) * (H + 8) }));
+await sharp({ create: { width: cols * (W + 8), height: Math.ceil(bufs.length / cols) * (H + 8), channels: 3, background: '#222' } }).composite(comps).jpeg({ quality: 82 }).toFile(out);
