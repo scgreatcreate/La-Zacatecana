@@ -1,7 +1,7 @@
 // Direction A — "La Mangonada, Desarmada". Entry (bundled as an IIFE by the shell).
 import {
   WebGLRenderer, Scene, PerspectiveCamera, PMREMGenerator, DirectionalLight, NeutralToneMapping,
-  Matrix4, Vector3, Color,
+  Matrix4, Vector3, Color, Mesh, BoxGeometry, MeshBasicMaterial,
 } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { gsap } from 'gsap';
@@ -42,10 +42,26 @@ function tintRoom(room) {
   room.traverse((o) => {
     if (!o.isMesh) return;
     const m = o.material;
-    if (m.side === 1 /* BackSide: the room shell */) m.color = new Color('#f6cdd8');
+    if (m.side === 1 /* BackSide: the room shell */) m.color = new Color('#efe4e2');
     else if (m.isMeshBasicMaterial && o.position.x > 14) m.color.setRGB(1, 0.78, 0.2).multiplyScalar(22); // sunflower panel, right
     else if (m.isMeshBasicMaterial && o.position.z > 14) m.color.setRGB(1, 0.94, 0.95).multiplyScalar(40);
   });
+  // bottle-photography rig: two tall strip softboxes in front + black flags outside them.
+  // Strips give PET its vertical highlight lines, flags give it dark edges → it reads as clear plastic.
+  const box = new BoxGeometry(1, 1, 1);
+  const flagMat = new MeshBasicMaterial({ color: new Color('#120509') });
+  const stripMat = new MeshBasicMaterial({ color: new Color(1, 0.97, 0.94).multiplyScalar(30) });
+  for (const x of [-1, 1]) {
+    const strip = new Mesh(box, stripMat);
+    strip.position.set(x * 4.2, 5.5, 9.5);
+    strip.rotation.y = x * 0.42;
+    strip.scale.set(1.1, 11, 0.1);
+    const flag = new Mesh(box, flagMat);
+    flag.position.set(x * 8.2, 5.5, 5.5);
+    flag.rotation.y = x * -0.75;
+    flag.scale.set(0.2, 13, 4.5);
+    room.add(strip, flag);
+  }
 }
 
 function start(section, canvas, gl, POSTER, STILL, goStatic) {
@@ -64,7 +80,7 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
   const renderer = new WebGLRenderer({ canvas, context: gl, antialias: true, alpha: true, premultipliedAlpha: true });
   renderer.setClearColor(0x000000, 0);
   renderer.toneMapping = NeutralToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 0.96;
   renderer.transmissionResolutionScale = phone ? 0.6 : 0.8;
   renderer.setPixelRatio(POSTER ? 1 : Math.min(window.devicePixelRatio || 1, phone ? 1.5 : 2));
 
@@ -73,12 +89,13 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
   const room = new RoomEnvironment();
   tintRoom(room);
   scene.environment = pmrem.fromScene(room, 0.035).texture;
+  scene.environmentIntensity = 0.72;
   room.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
   pmrem.dispose();
 
-  const key = new DirectionalLight(new Color('#ffe08a'), 1.15);
+  const key = new DirectionalLight(new Color('#ffe08a'), 1.5);
   key.position.set(3.2, 4.5, 2.6);
-  const fill = new DirectionalLight(new Color('#ffd6e2'), 0.4);
+  const fill = new DirectionalLight(new Color('#ffeedd'), 0.4);
   fill.position.set(-4, 1.8, 2.5);
   const rim = new DirectionalLight(new Color('#ffffff'), 0.75);
   rim.position.set(-1.5, 3.5, -4);
@@ -143,7 +160,7 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
     L.slot = document.querySelector('[data-flip-target="mangonada"] .flip-slot');
     L.img = L.slot ? L.slot.querySelector('img') : null;
     L.hasSlot = !!L.slot;
-    if (L.img) L.fit = getComputedStyle(L.img).objectFit || 'fill';
+    if (L.img) { L.fit = getComputedStyle(L.img).objectFit || 'fill'; scanPhoto(); }
     const maxScroll = Math.max(0, document.documentElement.scrollHeight - L.vh);
     if (L.hasSlot) {
       const r = L.slot.getBoundingClientRect();
@@ -194,7 +211,8 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
     return { x0, x1, y0, y1 };
   })();
   function paintedPhoto() {
-    const r = L.slot.getBoundingClientRect();
+    // the photo's own box (robust to however the shell sizes it), then its object-fit content box
+    const r = (L.img || L.slot).getBoundingClientRect();
     const nw = (L.img && L.img.naturalWidth) || 1074, nh = (L.img && L.img.naturalHeight) || 1400;
     let w = r.width, h = r.height;
     if (L.img && (L.fit === 'contain' || L.fit === 'scale-down' || L.fit === 'cover')) {
@@ -203,8 +221,32 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
     } else if (!L.img) { h = r.height * 0.92; w = h * 0.77; }
     return { x: r.left + (r.width - w) / 2, y: r.top + (r.height - h) / 2, w, h };
   }
+  // where the cup actually sits inside the slot photo (shell photos may be padded squares).
+  // Scanned once from the image's alpha; same-origin in production. Falls back to "fills the frame".
+  const photoBox = { x0: 0, y0: 0, x1: 1, y1: 1 };
+  let scanned = '';
+  function scanPhoto() {
+    const src = L.img && (L.img.currentSrc || L.img.src);
+    if (!src || src === scanned) return;
+    scanned = src;
+    const im = new Image();
+    im.decoding = 'async';
+    im.src = src;
+    (im.decode ? im.decode() : new Promise((r, j) => { im.onload = r; im.onerror = j; })).then(() => {
+      const w = 96, h = Math.max(8, Math.round((96 * im.naturalHeight) / im.naturalWidth));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const g = c.getContext('2d', { willReadFrequently: true });
+      g.drawImage(im, 0, 0, w, h);
+      const d = g.getImageData(0, 0, w, h).data;
+      let x0 = w, y0 = h, x1 = -1, y1 = -1;
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 110) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      if (x1 > x0 && y1 > y0 && (x1 - x0) * (y1 - y0) > w * h * 0.08) Object.assign(photoBox, { x0: x0 / w, y0: y0 / h, x1: (x1 + 1) / w, y1: (y1 + 1) / h });
+    }).catch(() => {});
+  }
   function shotLand() {
-    const pr = paintedPhoto();
+    const pp = paintedPhoto();
+    const pr = { x: pp.x + pp.w * photoBox.x0, y: pp.y + pp.h * photoBox.y0, w: pp.w * (photoBox.x1 - photoBox.x0), h: pp.h * (photoBox.y1 - photoBox.y0) };
     const scale = (pr.h * 0.995) / (landRef.y1 - landRef.y0);
     const midX = ((landRef.x0 + landRef.x1) / 2) * scale, midY = ((landRef.y0 + landRef.y1) / 2) * scale;
     return { cx: pr.x + pr.w * 0.5 - midX, cy: pr.y + pr.h * 0.5 - midY, scale, ...LAND };
@@ -256,7 +298,8 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
 
   // ------------------------------------------------------------------ frame
   let raf = 0, last = 0, t0 = -1, pDisp = -1, lost = false, docVisible = !document.hidden, inView = true, live = false;
-  const info = { calls: 0, triangles: 0, frameMs: 0 };
+  const info = { calls: 0, triangles: 0, frameMs: 0, frames: 0 };
+  let lastSig = '';
 
   function render(now) {
     const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
@@ -329,10 +372,13 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
     const colX = narrow ? Math.min(L.vw - 152, sh.cx + 0.98 * sh.scale + 14) : sh.cx + 1.18 * sh.scale + 34;
     callouts.update(anchors, colX, [L.top + 12, L.vh - L.bottom - 12]);
 
-    // ---- render
-    if (!done) {
+    // ---- render (skip identical frames: frozen tooling mode, or p/pointer settled with no ambient)
+    const sig = `${p}|${sh.cx.toFixed(2)}|${sh.cy.toFixed(2)}|${sh.az.toFixed(5)}|${sh.el.toFixed(5)}|${L.cw}x${L.ch}`;
+    const same = STILL && sig === lastSig;
+    lastSig = sig;
+    if (!done && !same) {
       renderer.render(scene, camera);
-      info.calls = renderer.info.render.calls; info.triangles = renderer.info.render.triangles;
+      info.calls = renderer.info.render.calls; info.triangles = renderer.info.render.triangles; info.frames++;
     }
     info.frameMs = performance.now() - tStart;
     info.p = p;
@@ -345,7 +391,12 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
   }
   function loop(now) {
     raf = 0;
-    if (!shouldRun()) { if (live) render(now); last = 0; return; }
+    if (!shouldRun()) {
+      // leaving (or jumped past) the hero: settle exactly on the scroll target so nothing is left mid-flight
+      if (live && !lost) { pDisp = pFromScroll(window.scrollY); render(now); }
+      last = 0;
+      return;
+    }
     render(now);
     raf = requestAnimationFrame(loop);
   }
@@ -366,7 +417,8 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
   document.addEventListener('visibilitychange', () => { docVisible = !document.hidden; last = 0; wake(); });
   const io = new IntersectionObserver((es) => { inView = es[0].isIntersecting; wake(); }, { rootMargin: '0px 0px 40% 0px' });
   io.observe(section);
-  const ro = new ResizeObserver(() => ScrollTrigger.refresh());
+  let roT = 0;
+  const ro = new ResizeObserver(() => { clearTimeout(roT); roT = setTimeout(() => ScrollTrigger.refresh(), 160); });
   const fav = document.querySelector('[data-flip-target="mangonada"]');
   if (fav) ro.observe(fav.closest('section') || fav);
 
@@ -403,12 +455,13 @@ function start(section, canvas, gl, POSTER, STILL, goStatic) {
   ready.then(begin);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { callouts.measure(); });
 
-  // dev / QA hooks
+  // QA hooks (read-only; used by tools/shots.mjs and tools/check.mjs)
   window.__heroA = {
     info: () => ({ ...info, programs: renderer.info.programs ? renderer.info.programs.length : 0, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
     scrollForP: (p) => { measure(); return scrollForP(p); },
     p: () => pDisp,
-    layout: () => ({ ...L, slot: !!L.slot, img: !!L.img }),
+    running: () => !!raf,
+    layout: () => ({ ...L, slot: !!L.slot, img: !!L.img, photoBox: { ...photoBox } }),
   };
 }
 

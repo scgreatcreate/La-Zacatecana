@@ -64,7 +64,7 @@
   position: absolute;
   left: clamp(20px, 5.2vw, 84px);
   bottom: clamp(28px, 7svh, 76px);
-  width: min(35rem, 44vw);
+  width: min(40rem, 47vw);
   pointer-events: auto;
   will-change: transform, opacity;
 }
@@ -80,7 +80,7 @@
 .hero--b .hero-b__tagline {
   display: block;
   font-family: "Lilita One", Rubik, system-ui, sans-serif;
-  font-size: clamp(2.1rem, 3.5vw + 0.4rem, 3.75rem);
+  font-size: clamp(2.1rem, 2.6vw + 0.6rem, 3.4rem);
   line-height: 0.98;
   letter-spacing: 0.005em;
   color: var(--hb-ink);

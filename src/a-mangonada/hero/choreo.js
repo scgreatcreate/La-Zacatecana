@@ -15,9 +15,9 @@ export const W = {
   chamoy: { ex: [0.19, 0.46], as: [0.57, 0.665] },
 };
 export const T = {
-  copyOut: [0.012, 0.085], toApart: [0.03, 0.31], toWhole: [0.56, 0.80], land: [0.858, 1.0],
-  fresh: [0.715, 0.875], callOut: [0.535, 0.572], photo: [0.955, 1.0],
-  apartIn: [0.2, 0.27], apartOut: [0.53, 0.57], wholeIn: [0.665, 0.72], wholeOut: [0.83, 0.857],
+  copyOut: [0.012, 0.085], toApart: [0.03, 0.31], toWhole: [0.56, 0.80], land: [0.858, 0.974],
+  fresh: [0.715, 0.875], callOut: [0.535, 0.572], photo: [0.962, 1.0],
+  apartIn: [0.27, 0.33], apartOut: [0.53, 0.57], wholeIn: [0.665, 0.72], wholeOut: [0.83, 0.857],
 };
 
 /** travel out: machined, symmetric ease */
@@ -81,7 +81,9 @@ export function applyPose(P, p, t, still) {
     const st = k(p, 'straw');
     const gs = P.straw;
     // straw stays threaded through the lid but slides up so the stack stays legible
-    gs.position.set(0, lerp(POSE.straw.base[1], POSE.straw.ex[1], st.k) - st.dip * 0.05 + bob(2, st.k), 0);
+    // …and on landing it sinks into the cup so the silhouette matches the real photo (no straw showing)
+    const sink = 0.62 * smooth(seg(p, 0.87, 0.95));
+    gs.position.set(0, lerp(POSE.straw.base[1], POSE.straw.ex[1], st.k) - st.dip * 0.05 + bob(2, st.k) - sink, 0);
     gs.rotation.set(st.k * 0.2, 0, st.k * -0.05);
   }
   // banderilla: lifts, then lays down across the stack
@@ -94,8 +96,10 @@ export function applyPose(P, p, t, still) {
     _qb.setFromEuler(_e.set(B.exRot[0], B.exRot[1], B.exRot[2]));
     g.quaternion.slerpQuaternions(_qa, _qb, s.k);
   }
-  // mango cubes (instanced, per-cube stagger)
-  {
+  // mango cubes (instanced, per-cube stagger) — skipped when at rest and unchanged
+  const restC = p <= W.cubes.ex[0] - 0.03 || p >= W.cubes.as[1] + 0.03;
+  if (!(restC && P._lastC === p)) {
+    P._lastC = p;
     const w = W.cubes;
     const D = P.cubeData;
     for (let i = 0; i < D.length; i++) {
@@ -116,8 +120,10 @@ export function applyPose(P, p, t, still) {
     }
     P.cubes.instanceMatrix.needsUpdate = true;
   }
-  // Tajín: spirals up into a cloud
-  {
+  // Tajín: spirals up into a cloud — skipped when at rest and unchanged
+  const restT = p <= W.tajin.ex[0] - 0.035 || p >= W.tajin.as[1] + 0.035;
+  if (!(restT && P._lastT === p)) {
+    P._lastT = p;
     const w = W.tajin;
     const D = P.tajinData;
     const spin = amb * t * 0.12;

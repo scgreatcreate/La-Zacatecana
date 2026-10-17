@@ -3,12 +3,13 @@
 import {
   WebGLRenderer, Scene, PerspectiveCamera, OrthographicCamera, Mesh, BufferGeometry, BufferAttribute,
   InstancedBufferGeometry, InstancedBufferAttribute, BoxGeometry, ShaderMaterial, WebGLRenderTarget,
-  CanvasTexture, Vector3, Matrix4, LinearFilter, LinearMipmapLinearFilter, RepeatWrapping, ClampToEdgeWrapping,
+  CanvasTexture, Texture, Vector3, Vector4, Matrix4, LinearFilter, LinearMipmapLinearFilter, RepeatWrapping, ClampToEdgeWrapping,
   CustomBlending, ZeroFactor, SrcColorFactor, MinEquation, AddEquation, OneFactor, BackSide, DoubleSide,
   NoColorSpace,
 } from 'three';
 import * as SH from './shaders.js';
 import { rasterizeAtlas, TILE, HEADER, tileRect } from './atlas.js';
+import { PRODUCTS } from './products.js';
 import zacSvg from '../../../assets/brand/zacatecas.svg';
 import wordmarkSvg from '../../../assets/brand/wordmark.svg';
 
@@ -30,9 +31,9 @@ const LETTER_COLORS = ['magenta', 'green', 'mango', 'chamoy', 'green', 'magenta'
 const MOTIFS = [TILE.cone, TILE.strawberry, TILE.elote, TILE.chile, TILE.cactus, TILE.zacatecas, TILE.dalia, TILE.paleta];
 
 // key light: warm daylight from the upper left, slightly in front of the wall
-const LDIR = new Vector3(-0.42, 0.58, 0.7).normalize();
-const KEY = [1.0, 0.93, 0.82].map((c) => c * 1.25);
-const SKY = [0.62, 0.7, 0.85].map((c) => c * 0.42);
+const LDIR = new Vector3(-0.36, 0.5, 0.79).normalize();
+const KEY = [1.0, 0.92, 0.8].map((c) => c * 1.5);
+const SKY = [0.6, 0.68, 0.86].map((c) => c * 0.34);
 const BOUNCE = [0.55, 0.36, 0.34].map((c) => c * 0.2);
 
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
@@ -140,7 +141,7 @@ function revealGeometry(hw, ySill, ySpring, depth, sill) {
 }
 
 // ---------------------------------------------------------------- scene
-export async function createScene({ canvas, stage, getCopyRect, phone, debug = {} }) {
+export async function createScene({ canvas, stage, getCopyRect, phone, assetBase = 'assets/' }) {
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance', stencil: false });
   renderer.autoClear = true;
   renderer.info.autoReset = false;
@@ -192,6 +193,8 @@ export async function createScene({ canvas, stage, getCopyRect, phone, debug = {
     uC: { value: Array.from({ length: MAXS }, () => new Vector3()) },
     uE: { value: Array.from({ length: MAXS }, () => new Vector3()) },
     uFl: { value: new Float32Array(MAXS).fill(1) },
+    uLv: { value: new Float32Array(MAXS).fill(0.3) },
+    uGa: { value: new Float32Array(MAXS).fill(0) },
     uTime: { value: 0 },
     uWind: { value: 1 },
     uPtrO: { value: new Vector3(0, 0, 50) },
@@ -268,7 +271,7 @@ export async function createScene({ canvas, stage, getCopyRect, phone, debug = {
     uSill: { value: [sill.hx, sill.th, sill.pr, WALL.depth] },
     uAlb: { value: v3(calib) },
     uShOn: { value: 1 },
-    uSoft: { value: 0.18 },
+    uSoft: { value: 0.04 },
     uIsJamb: { value: 0 },
   };
   const wallMat = new ShaderMaterial({ uniforms: wallU, vertexShader: SH.WALL_VS, fragmentShader: SH.WALL_FS });
@@ -308,13 +311,43 @@ export async function createScene({ canvas, stage, getCopyRect, phone, debug = {
     uH: { value: CTR.h },
     uExpo: roomU.uExpo, uRes: U.uRes, uVig: U.uVig,
     uFlat: { value: 0 },
+    uProd: { value: Array.from({ length: 4 }, () => new Vector4(0, 0, 1, 1)) },
+    uProdOn: { value: 0 },
   };
   const ctrGeo = new BoxGeometry(CTR.x1 - CTR.x0, CTR.h, CTR.depth);
   ctrGeo.translate((CTR.x0 + CTR.x1) / 2, CTR.h / 2, CTR.zf - CTR.depth / 2);
   const counter = new Mesh(ctrGeo, new ShaderMaterial({ uniforms: counterU, vertexShader: SH.WALL_VS, fragmentShader: SH.COUNTER_FS }));
 
+  // ---- real product cutouts on the counter ("the counter becomes the menu"); loaded after first paint
+  const prodGeo = new InstancedBufferGeometry();
+  prodGeo.setAttribute('position', new BufferAttribute(new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0]), 3));
+  prodGeo.setIndex([0, 1, 2, 0, 2, 3]);
+  const pRect = new InstancedBufferAttribute(new Float32Array(16), 4);
+  const pPos = new InstancedBufferAttribute(new Float32Array(16), 4);
+  const pAsp = new InstancedBufferAttribute(new Float32Array(4), 1);
+  prodGeo.setAttribute('iRect', pRect); prodGeo.setAttribute('iPos', pPos); prodGeo.setAttribute('iAsp', pAsp);
+  prodGeo.instanceCount = 0;
+  const prodU = { uTex: { value: null }, uExpo: roomU.uExpo, uFade: { value: 0 } };
+  const products = new Mesh(prodGeo, new ShaderMaterial({ uniforms: prodU, vertexShader: SH.PROD_VS, fragmentShader: SH.PROD_FS, alphaToCoverage: true }));
+  products.frustumCulled = false;
+  products.visible = false;
+  {
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => {
+      const tex = new Texture(img);
+      tex.flipY = false; tex.colorSpace = NoColorSpace; tex.anisotropy = Math.min(4, maxAniso);
+      tex.minFilter = LinearMipmapLinearFilter; tex.needsUpdate = true;
+      prodU.uTex.value = tex;
+      products.visible = true;
+      prodU.uFade.value = 1;
+      counterU.uProdOn.value = 1;
+    };
+    img.src = assetBase + 'products.webp';
+  }
+
   const scene = new Scene();
-  scene.add(room, counter, wall, reveal, flags, cords);
+  scene.add(room, counter, products, wall, reveal, flags, cords);
   const shScene = new Scene();
   shScene.add(flagsSh, cordsSh);
   const blurU = { uTex: { value: shA.texture }, uDir: { value: [1 / shSize[0], 0] } };
@@ -341,7 +374,7 @@ export async function createScene({ canvas, stage, getCopyRect, phone, debug = {
     if (portrait) {
       fw = 0.54;
       sxw = 0.5;
-      sySill = copy ? Math.min(0.7, (copy.top - 14) / H) : 0.64;
+      sySill = copy ? Math.min(0.7, (copy.top - 34) / H) : 0.62;
     } else {
       fw = Math.min(0.3, 0.34 / a);
       const right = copy ? copy.right / W : 0.46;
@@ -354,110 +387,148 @@ export async function createScene({ canvas, stage, getCopyRect, phone, debug = {
     const cx = -(sxw - 0.5) * visW;
     const cy = WALL.ySill - (0.5 - sySill) * visH;
 
-    // strings: screen y at the screen edge and at the centre dip; depth from the wall
-    const edges = portrait ? [0.08, 0.155, 0.23, 0.305] : [0.09, 0.18, 0.27, 0.35];
-    const dip = portrait ? 0.03 : 0.045;
-    const depths = [0.35, 0.6, 0.85, 1.1];
-    const motifPitch = portrait ? W / 4.4 : Math.max(84, Math.min(132, W * 0.078));
-    strings.length = 0;
-    const inst = [];
-    const word = ['dalia', 'L', 'A', 'zacatecas', 'Z', 'A', 'C', 'A', 'T', 'E', 'C', 'A', 'N', 'A', 'dalia'];
-    const letters = portrait ? word.slice(1, 14) : word;
-    let colorIx = 0;
-    for (let i = 0; i < 4; i++) {
-      const z = depths[i];
-      const sc = (D - z) / D;
-      const hv = (visW * sc) / 2;                       // visible half width at this depth
-      const yAt = (sy) => cy + (0.5 - sy) * visH * sc;   // screen y → world y at this depth
-      const yEdge = yAt(edges[i]), yMid = yAt(edges[i] + dip);
-      const Wd = hv * 1.3;                              // anchors beyond the screen edge
-      const k = (yEdge - yMid) / (hv * hv);
-      const S = k * Wd * Wd;                            // sag from anchor to centre
-      const Y = yMid + S;
-      const isLetters = i === 3;
-      const pitchPx = isLetters ? Math.min(motifPitch * (portrait ? 1 : 0.92), (W * (portrait ? 0.975 : 0.93)) / letters.length) : motifPitch * (1 - i * 0.04);
-      const pitch = (pitchPx / W) * visW * sc;
-      const fwid = pitch * (isLetters ? 0.9 : 0.86);
-      const fh = fwid * 1.25;
-      // letter string: joint between two flags so the word is centred; motif strings: centred joint
-      const nL = isLetters ? Math.ceil(letters.length / 2) : 0;
-      const x0 = cx + (isLetters && letters.length % 2 ? pitch / 2 : 0);
-      const ytop = cy + (visH * sc) / 2;
-      const lift = ytop - Y + fh * 1.6 + 0.6;
-      const st = [0.1, 0.07, 0.04, 0.01][i];
-      for (const side of [-1, 1]) {
-        const A0 = new Vector3(x0 + side * Wd, Y, z);
-        const E0 = new Vector3(x0, Y - S, z);
-        const C0 = new Vector3(x0 + side * Wd / 2, Y - S, z);
-        // arc-length table from the joint (t=1) toward the anchor (t=0)
-        const N = 96, tab = [0];
-        let prev = bezier(A0, C0, E0, 1), acc = 0;
-        for (let j = 1; j <= N; j++) {
-          const pt = bezier(A0, C0, E0, 1 - j / N);
-          acc += pt.distanceTo(prev); prev = pt; tab.push(acc);
-        }
-        const tAt = (s) => {
-          for (let j = 1; j <= N; j++) if (tab[j] >= s) { const f = (s - tab[j - 1]) / (tab[j] - tab[j - 1]); return 1 - (j - 1 + f) / N; }
-          return 0;
-        };
-        const hs = strings.length;
-        strings.push({ i, side, A0, C0, E0, S, Wd, z, lift, x0, Y, st, hv });
-        // flags along this half
-        const seq = [];
-        if (isLetters) {
-          const left = letters.slice(0, nL).reverse();
-          const right = letters.slice(nL);
-          seq.push(...(side < 0 ? left : right));
-          // pad desktop letter string with motifs to the edges
-          const extra = Math.ceil(hv / pitch) + 1 - seq.length;
-          for (let e = 0; e < extra; e++) seq.push(MOTIFS[(e * 3 + (side > 0 ? 1 : 4)) % MOTIFS.length]);
-        } else {
-          const n = Math.ceil(hv / pitch) + 1;
-          for (let e = 0; e < n; e++) seq.push(MOTIFS[(e * 5 + i * 3 + (side > 0 ? 2 : 0)) % MOTIFS.length]);
-        }
-        const off = isLetters && letters.length % 2 ? 0 : 0;
-        seq.forEach((kind, e) => {
-          const c = (e + 0.5) * pitch + off;
-          const t0 = tAt(c - fwid / 2), t1 = tAt(c + fwid / 2);
-          const tile = typeof kind === 'number' ? kind : TILE[kind];
-          const isLetter = typeof kind === 'string' && kind.length === 1;
-          let colName;
-          if (isLetter) {
-            const li = letters.indexOf(kind) + (side > 0 ? nL : 0) + e;
-            colName = LETTER_COLORS[li % LETTER_COLORS.length];
-          } else colName = MOTIF_COLORS[(colorIx++) % MOTIF_COLORS.length];
-          // left half runs right→left; keep the sheet facing the viewer (u from left to right)
-          const ta = side < 0 ? t1 : t0, tb = side < 0 ? t0 : t1;
-          inst.push({ ta: side < 0 ? Math.min(t0, t1) : Math.min(t0, t1), tb: side < 0 ? Math.max(t0, t1) : Math.max(t0, t1), side, tile, col: lin(HEX[colName]), hs, fh, isLetter, ta2: ta, tb2: tb });
-        });
-      }
-    }
-    // write instance attributes (back strings first)
-    inst.forEach((f, n) => {
-      if (n >= MAXF) return;
-      // u runs left→right on screen. On the left half t grows toward the joint (rightward), on the right half t shrinks.
-      const t0 = f.side < 0 ? f.ta : f.tb, t1 = f.side < 0 ? f.tb : f.ta;
-      aT.array[n * 2] = t0; aT.array[n * 2 + 1] = t1;
-      const r = tileRect(f.tile);
-      aTile.array.set(r, n * 4);
-      aCol.array.set(f.col, n * 3);
-      aMisc.array.set([f.hs, fract(Math.sin(n * 91.7 + 3.1) * 4375.5), f.fh, f.isLetter ? 1 : 0], n * 4);
-    });
-    flagGeo.instanceCount = Math.min(MAXF, inst.length);
-    aT.needsUpdate = aTile.needsUpdate = aCol.needsUpdate = aMisc.needsUpdate = true;
-
     // interior framing at p = 1 (solve so the counter top and wordmark land where we want them)
     const t1 = Math.tan((fov1 * Math.PI) / 360);
-    const syCt = portrait ? 0.6 : 0.62;
+    const syCt = portrait ? 0.62 : 0.63;
     const dC = portrait ? 1.9 : 2.6;
     const ycam1 = CTR.h + (syCt - 0.5) * 2 * dC * t1;
     const zcam1 = CTR.zf + dC;
     const dY = zcam1 - ROOM.z0;
-    const syWm = portrait ? 0.31 : 0.33;
+    const syWm = portrait ? 0.305 : 0.31;
     const yWm = ycam1 + (0.5 - syWm) * 2 * dY * t1;
     const Ww = Math.min(2.5, (portrait ? 0.86 : 0.5) * 2 * dY * t1 * a);
     const Wh = (Ww * 230) / 1087;
     roomU.uMarkRect.value = [-Ww / 2, yWm - Wh / 2, Ww, Wh];
+
+
+    // ---- strings. Screen-space design (y at left edge, right edge, extra dip at the centre), placed at a depth
+    // in front of the wall. Each string is two halves joined at the centre: the curtain parts there.
+    const design = portrait
+      ? [ { yl: 0.085, yr: 0.15, dip: 0.022, z: 0.3 }, { yl: 0.175, yr: 0.105, dip: 0.022, z: 0.5 },
+          { yl: 0.235, yr: 0.25, dip: 0.03, z: 0.7 }, { yl: 0.325, yr: 0.325, dip: 0.028, z: 0.9 } ]
+      : [ { yl: 0.1, yr: 0.13, dip: 0.06, z: 0.3 }, { yl: 0.2, yr: 0.17, dip: 0.06, z: 0.55 },
+          { yl: 0.3, yr: 0.3, dip: 0.055, z: 0.85 } ];
+    const motifPitch = portrait ? W / 4.3 : Math.max(80, Math.min(124, W * 0.07));
+    strings.length = 0;
+    const inst = [];
+    const word = ['dalia', 'L', 'A', 'zacatecas', 'Z', 'A', 'C', 'A', 'T', 'E', 'C', 'A', 'N', 'A', 'dalia'];
+    const letters = portrait ? word.slice(1, 14) : word;
+    let colorIx = 0, letterIx = 0;
+    const rnd = (n) => fract(Math.sin(n * 127.1 + 311.7) * 43758.5453);
+
+    // generic half-string builder: parabola y = yM + b·X + k·X² around the joint x0 (X = x − x0)
+    function addHalves({ x0, z, yM, b, k, Wd, st, lift, kinds, pitch, fwid, fh, interior }) {
+      for (const side of [-1, 1]) {
+        const X = side * Wd;
+        const yA = yM + b * X + k * X * X;
+        const slope = b + 2 * k * X;
+        const A0 = new Vector3(x0 + X, yA, z);
+        const E0 = new Vector3(x0, yM, z);
+        const C0 = new Vector3(x0 + X / 2, yA - slope * (X / 2), z);
+        const N = 96, tab = [0];
+        let prev = bezier(A0, C0, E0, 1), acc = 0;
+        for (let j = 1; j <= N; j++) { const pt = bezier(A0, C0, E0, 1 - j / N); acc += pt.distanceTo(prev); prev = pt; tab.push(acc); }
+        const tAt = (sArc) => {
+          for (let j = 1; j <= N; j++) if (tab[j] >= sArc) { const f = (sArc - tab[j - 1]) / (tab[j] - tab[j - 1]); return 1 - (j - 1 + f) / N; }
+          return 0;
+        };
+        const hs = strings.length;
+        strings.push({ side, A0, C0, E0, Wd, hv: Wd / 1.3, z, lift, st, interior: !!interior });
+        const seq = kinds(side);
+        seq.forEach((kind, e) => {
+          const c = (e + 0.5) * pitch;
+          const ta = tAt(c - fwid / 2), tb = tAt(c + fwid / 2);
+          const lo = Math.min(ta, tb), hi = Math.max(ta, tb);
+          const isLetter = typeof kind === 'string' && kind.length === 1;
+          const tile = typeof kind === 'number' ? kind : TILE[kind];
+          const colName = isLetter ? null : MOTIF_COLORS[(colorIx++) % MOTIF_COLORS.length];
+          inst.push({ t0: side < 0 ? lo : hi, t1: side < 0 ? hi : lo, tile, hs, fh, fw: fwid, isLetter, colName, kind, side, e });
+        });
+      }
+    }
+
+    design.forEach((d, i) => {
+      const sc = (D - d.z) / D;
+      const hv = (visW * sc) / 2;
+      const yAt = (sy) => cy + (0.5 - sy) * visH * sc;
+      const yl = yAt(d.yl), yr = yAt(d.yr), yM = (yl + yr) / 2 - d.dip * visH * sc;
+      const bb = (yr - yl) / (2 * hv), kk = ((yl + yr) / 2 - yM) / (hv * hv);
+      const isLetters = i === design.length - 1;
+      const pitchPx = isLetters ? Math.min(motifPitch * (portrait ? 1 : 0.95), (W * (portrait ? 0.975 : 0.93)) / letters.length) : motifPitch * (1 - i * 0.05);
+      const pitch = (pitchPx / W) * visW * sc;
+      const fwid = pitch * (isLetters ? 0.9 : 0.85);
+      const fh = fwid * 1.25;
+      const nL = isLetters ? Math.ceil(letters.length / 2) : 0;
+      const x0 = cx + (isLetters && letters.length % 2 ? pitch / 2 : 0);
+      const ytop = cy + (visH * sc) / 2;
+      const lift = ytop - Math.min(yl, yr) + fh * 1.4 + 0.5;
+      addHalves({
+        x0, z: d.z, yM, b: bb, k: kk, Wd: hv * 1.3, st: (design.length - 1 - i) * 0.05, lift, pitch, fwid, fh,
+        kinds: (side) => {
+          const seq = [];
+          if (isLetters) {
+            seq.push(...(side < 0 ? letters.slice(0, nL).reverse() : letters.slice(nL)));
+            const extra = Math.ceil(hv / pitch) + 1 - seq.length;
+            for (let e = 0; e < extra; e++) seq.push(MOTIFS[(e * 3 + (side > 0 ? 1 : 4)) % MOTIFS.length]);
+          } else {
+            const n = Math.ceil(hv / pitch) + 1;
+            for (let e = 0; e < n; e++) seq.push(MOTIFS[Math.floor(rnd(i * 31 + e * 7 + (side > 0 ? 3 : 0)) * MOTIFS.length)]);
+          }
+          return seq;
+        },
+      });
+    });
+
+    // ---- a small string inside the shop, along the top of the yellow wall (no curtain move, no cast shadow).
+    // It always occupies half-strings 8 and 9 (the light pass skips those); unused outdoor slots stay degenerate.
+    while (strings.length < 8) strings.push({ unused: true });
+    {
+      const zI = ROOM.z0 + 0.45;
+      const dI = zcam1 - zI;
+      const yTopI = ycam1 + (0.5 - (portrait ? 0.085 : 0.085)) * 2 * dI * t1;
+      const hvI = dI * t1 * a + 0.2;
+      const pitchI = portrait ? 0.24 : 0.25;
+      const dipI = portrait ? 0.12 : 0.08;
+      addHalves({
+        x0: 0, z: zI, yM: yTopI - dipI, b: 0, k: dipI / (hvI * hvI), Wd: hvI * 1.15, st: 2, lift: 0,
+        pitch: pitchI, fwid: pitchI * 0.86, fh: pitchI * 0.86 * 1.25, interior: true,
+        kinds: (side) => { const n = Math.ceil(hvI / pitchI) + 1; const q = []; for (let e = 0; e < n; e++) q.push(MOTIFS[(e * 3 + (side > 0 ? 5 : 1)) % MOTIFS.length]); return q; },
+      });
+    }
+
+    // colours: letters alternate strong tissue colours so the cut letters (showing the pale wall) read clearly
+    inst.filter((f) => f.isLetter)
+      .sort((p1, p2) => (p1.side * (p1.e + 0.5)) - (p2.side * (p2.e + 0.5)))
+      .forEach((f) => { f.colName = LETTER_COLORS[(letterIx++) % LETTER_COLORS.length]; });
+    inst.forEach((f, n) => {
+      if (n >= MAXF) return;
+      aT.array[n * 2] = f.t0; aT.array[n * 2 + 1] = f.t1;
+      aTile.array.set(tileRect(f.tile), n * 4);
+      aCol.array.set(lin(HEX[f.colName]), n * 3);
+      aMisc.array.set([f.hs, rnd(n * 3.7 + 1.3), f.fh, f.fw], n * 4);
+    });
+    flagGeo.instanceCount = Math.min(MAXF, inst.length);
+    aT.needsUpdate = aTile.needsUpdate = aCol.needsUpdate = aMisc.needsUpdate = true;
+
+    // products across the counter top, tall ones at the ends, framed for p = 1
+    {
+      const order = portrait ? [1, 2, 3] : [1, 0, 2, 3];
+      const zP = CTR.zf - 0.2;
+      const fwC = 2 * (zcam1 - zP) * t1 * a;
+      const spread = fwC * (portrait ? 0.68 : 0.56);
+      const scl = portrait ? 0.82 : 1.05;
+      order.forEach((pi, j) => {
+        const P = PRODUCTS[pi];
+        const xP = order.length === 1 ? 0 : -spread / 2 + (spread * j) / (order.length - 1);
+        pRect.array.set(P.uv, j * 4);
+        pPos.array.set([xP, CTR.h - 0.004, zP, P.h * scl], j * 4);
+        pAsp.array[j] = P.aspect;
+        counterU.uProd.value[j].set(xP, zP + 0.01, P.h * scl * P.aspect * 0.42, 0.07);
+      });
+      for (let j = order.length; j < 4; j++) counterU.uProd.value[j].set(99, 99, 0.01, 0.01);
+      prodGeo.instanceCount = order.length;
+      pRect.needsUpdate = pPos.needsUpdate = pAsp.needsUpdate = true;
+    }
 
     L = { W, H, a, portrait, fov0, fov1, D, cx, cy, visW, visH, ycam1, zcam1, yWinMid: WALL.ySill + 0.85 };
     U.uPtrR.value = visW * 0.07;
@@ -496,22 +567,29 @@ export async function createScene({ canvas, stage, getCopyRect, phone, debug = {
   const T0 = new Vector3(), T1 = new Vector3(), T2 = new Vector3(), T3 = new Vector3();
 
   function applyP(p) {
-    // strings part from the centre and lift like a curtain, front string first
+    // strings part at the centre like a theatre curtain, front string first: the inner ends draw out to the
+    // edges (flags gather toward the sides), then the whole string flies up out of frame.
     strings.forEach((s, k) => {
-      const sp = smoother(span(p, s.st, s.st + 0.34));
-      const ex = 1 - Math.pow(1 - sp, 1.6);   // parting leads
-      const ey = Math.pow(sp, 1.25);         // lifting follows
       const A = U.uA.value[k], C = U.uC.value[k], E = U.uE.value[k];
-      A.set(s.A0.x + s.side * s.Wd * 0.1 * ey, s.A0.y + s.lift * ey, s.z);
-      E.set(s.x0 + s.side * s.Wd * 0.72 * ex, s.E0.y + (s.S + s.lift * 1.15) * ey, s.z);
-      const sag = (s.S / 2) * (1 - 0.5 * sp) + s.S * 0.35 * Math.sin(Math.PI * sp);
-      C.set((A.x + E.x) / 2, (A.y + E.y) / 2 - sag, s.z + 0.35 * Math.sin(Math.PI * sp));
-      U.uFl.value[k] = 1 + 1.9 * Math.sin(Math.PI * sp);
+      if (s.unused) { A.set(0, -50, 0); C.set(0, -50, 0); E.set(0, -50, 0); return; }
+      if (s.interior) { A.copy(s.A0); C.copy(s.C0); E.copy(s.E0); U.uFl.value[k] = 0.8; U.uLv.value[k] = 0.25; U.uGa.value[k] = 0; return; }
+      const sp = span(p, s.st, s.st + 0.5);
+      const ex = smooth(span(sp, 0.0, 0.75));   // parting
+      const ey = smooth(span(sp, 0.35, 1.0));   // flying out
+      A.set(s.A0.x + s.side * s.hv * 0.15 * ey, s.A0.y + s.lift * ey, s.z);
+      E.set(s.E0.x + s.side * s.hv * 1.02 * ex, s.E0.y + (s.A0.y - s.E0.y) * 0.55 * ex + s.lift * 1.05 * ey, s.z);
+      const mx0 = (s.A0.x + s.E0.x) / 2, my0 = (s.A0.y + s.E0.y) / 2;
+      const tight = 1 - 0.7 * ex;
+      C.set((A.x + E.x) / 2 + (s.C0.x - mx0) * tight, (A.y + E.y) / 2 + (s.C0.y - my0) * tight, s.z + 0.28 * Math.sin(Math.PI * sp));
+      const act = Math.sin(Math.PI * Math.min(1, sp * 1.25));
+      U.uFl.value[k] = 1 + 2.1 * act;
+      U.uLv.value[k] = 0.25 + 0.5 * ex;
+      U.uGa.value[k] = ex;
     });
     // camera: dolly toward the arched opening, through it, and settle on the yellow wall + counter
-    const u = smoother(span(p, 0.03, 0.97));
+    const u = smoother(span(p, 0.04, 0.97));
     P0.set(L.cx, L.cy, L.D);
-    P1.set(lerp(L.cx, 0, 0.55), lerp(L.cy, L.yWinMid, 0.75), L.D * 0.32);
+    P1.set(lerp(L.cx, 0, 0.5), lerp(L.cy, L.yWinMid, 0.7), L.D * 0.6);
     P2.set(0, L.yWinMid - 0.1, -0.7);
     P3.set(0, L.ycam1, L.zcam1);
     cubic(P0, P1, P2, P3, u, camera.position);
@@ -528,8 +606,7 @@ export async function createScene({ canvas, stage, getCopyRect, phone, debug = {
     roomU.uExpo.value = lerp(0.8, 1.0, smooth(span(p, 0.45, 0.8)));
     counterU.uFlat.value = smooth(span(p, 0.85, 1.0));
     U.uVig.value = lerp(0.32, 0.18, smooth(span(p, 0.5, 1.0)));
-    const show = p < 0.62;
-    flags.visible = cords.visible = show;
+    shadowsOn = p < 0.64;
   }
 
   // ---------------------------------------------------------------- render
@@ -547,7 +624,7 @@ export async function createScene({ canvas, stage, getCopyRect, phone, debug = {
     return true;
   }
 
-  let p = 0;
+  let p = 0, shadowsOn = true;
   function setP(v) { p = v; }
 
   function render(time) {
@@ -555,14 +632,14 @@ export async function createScene({ canvas, stage, getCopyRect, phone, debug = {
     U.uTime.value = time;
     applyP(p);
     // 1) light's-eye transmittance of the tissue, 2) separable blur, 3) main view
-    if (flags.visible) {
+    if (shadowsOn) {
       renderer.setClearColor(0xffffff, 1);
       renderer.setRenderTarget(shA);
       renderer.clear();
       renderer.render(shScene, lightCam);
-      blurU.uTex.value = shA.texture; blurU.uDir.value = [2.2 / shSize[0], 0];
+      blurU.uTex.value = shA.texture; blurU.uDir.value = [1.0 / shSize[0], 0];
       renderer.setRenderTarget(shB); renderer.render(blurScene, fsCam);
-      blurU.uTex.value = shB.texture; blurU.uDir.value = [0, 2.2 / shSize[1]];
+      blurU.uTex.value = shB.texture; blurU.uDir.value = [0, 1.0 / shSize[1]];
       renderer.setRenderTarget(shC); renderer.render(blurScene, fsCam);
       wallU.uShOn.value = 1;
     } else {

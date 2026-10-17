@@ -31,8 +31,8 @@
   #favoritos h2 { margin: 0 0 28px; font: 800 clamp(34px, 4vw, 56px)/1 "Bricolage Grotesque"; letter-spacing: -.035em; }
   .fav-row { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 12px; }
   .fav-row article { flex: 0 0 260px; width: 260px; height: 320px; border-radius: 22px; background: #fff; box-shadow: 0 1px 0 rgba(58,20,36,.06), 0 18px 40px -26px rgba(58,20,36,.35); overflow: hidden; }
-  .flip-slot { width: 260px; height: 260px; background: #FDEFF2; display: grid; place-items: center; }
-  .flip-slot img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .flip-slot { position: relative; width: 260px; height: 260px; background: #FDEFF2; overflow: hidden; }
+  .flip-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; }
   .fav-row h3 { margin: 0; padding: 18px 18px 0; font: 700 18px/1 "Bricolage Grotesque"; }
   .filler { height: 120vh; background: linear-gradient(#FFF8EE, #F9D9E0); display: grid; place-items: center; font: 600 14px "DM Sans"; color: #5E2A3D; }
 </style>
@@ -93,11 +93,11 @@
   <div class="hero-callouts">
     <svg class="hero-callouts__lines" aria-hidden="true" focusable="false"><g fill="none" stroke-width="1"></g></svg>
     <ul class="hero-callouts__list" aria-label="What goes into a Mangonada">
-      <li class="hero-callout" data-part="banderilla"><span class="hero-callout__es" lang="es">Banderilla de tamarindo</span><span class="hero-callout__en" lang="en">Tamarind candy stick</span></li>
-      <li class="hero-callout" data-part="tajin"><span class="hero-callout__es" lang="es">Tajín</span><span class="hero-callout__en" lang="en">Chile-lime seasoning</span></li>
-      <li class="hero-callout" data-part="mango"><span class="hero-callout__es" lang="es">Mango fresco</span><span class="hero-callout__en" lang="en">Fresh mango</span></li>
-      <li class="hero-callout" data-part="sorbet"><span class="hero-callout__es" lang="es">Nieve de mango</span><span class="hero-callout__en" lang="en">Mango sorbet</span></li>
-      <li class="hero-callout" data-part="chamoy"><span class="hero-callout__es" lang="es">Chamoy</span><span class="hero-callout__en" lang="en">Sweet-tangy chile sauce</span></li>
+      <li class="hero-callout" data-part="banderilla"><span class="hero-callout__n" aria-hidden="true">05</span><span class="hero-callout__es" lang="es">Banderilla de tamarindo</span><span class="hero-callout__en" lang="en">Tamarind candy stick</span></li>
+      <li class="hero-callout" data-part="tajin"><span class="hero-callout__n" aria-hidden="true">04</span><span class="hero-callout__es" lang="es">Tajín</span><span class="hero-callout__en" lang="en">Chile-lime seasoning</span></li>
+      <li class="hero-callout" data-part="mango"><span class="hero-callout__n" aria-hidden="true">03</span><span class="hero-callout__es" lang="es">Mango fresco</span><span class="hero-callout__en" lang="en">Fresh mango</span></li>
+      <li class="hero-callout" data-part="sorbet"><span class="hero-callout__n" aria-hidden="true">02</span><span class="hero-callout__es" lang="es">Nieve de mango</span><span class="hero-callout__en" lang="en">Mango sorbet</span></li>
+      <li class="hero-callout" data-part="chamoy"><span class="hero-callout__n" aria-hidden="true">01</span><span class="hero-callout__es" lang="es">Chamoy</span><span class="hero-callout__en" lang="en">Sweet-tangy chile sauce</span></li>
     </ul>
   </div>
 </section>

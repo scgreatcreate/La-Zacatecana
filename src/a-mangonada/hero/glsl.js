@@ -7,7 +7,7 @@ float zNoise(vec3 p){
   return mix(mix(mix(zHash13(i), zHash13(i + vec3(1,0,0)), f.x), mix(zHash13(i + vec3(0,1,0)), zHash13(i + vec3(1,1,0)), f.x), f.y),
              mix(mix(zHash13(i + vec3(0,0,1)), zHash13(i + vec3(1,0,1)), f.x), mix(zHash13(i + vec3(0,1,1)), zHash13(i + vec3(1,1,1)), f.x), f.y), f.z);
 }
-float zFbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++){ s += a * zNoise(p); p *= 2.03; a *= 0.5; } return s / 0.9375; }
+float zFbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 3; i++){ s += a * zNoise(p); p *= 2.03; a *= 0.5; } return s / 0.875; }
 `;
 
 /**
@@ -56,8 +56,9 @@ export const CLEAR_TRANSMISSION = /* glsl */`
   float tFres = pow( 1.0 - saturate( abs( dot( tN, tV ) ) ), 3.0 );
   float tHaze = uHaze + uEdgeHaze * tFres;
   vec3 tCol = ( 1.0 - tF ) * material.diffuseContribution * tPremul * volumeAttenuation( length( tRay ), material.attenuationColor, material.attenuationDistance );
-  material.transmissionAlpha = mix( 1.0, clamp( tCov + tHaze, 0.0, 1.0 ), material.transmission );
-  totalDiffuse = mix( totalDiffuse, tCol + tHaze * uHazeColor, material.transmission );
+  tHaze = clamp( tHaze, 0.0, 1.0 );
+  material.transmissionAlpha = mix( 1.0, clamp( tHaze + ( 1.0 - tHaze ) * tCov, 0.0, 1.0 ), material.transmission );
+  totalDiffuse = mix( totalDiffuse, tHaze * uHazeColor + ( 1.0 - tHaze ) * tCol, material.transmission );
 #endif
 `;
 export const CLEAR_BACKPASS = /* glsl */`

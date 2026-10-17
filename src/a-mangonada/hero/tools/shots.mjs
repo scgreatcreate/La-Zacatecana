@@ -14,7 +14,7 @@ const ps = arg('ps', '0,0.25,0.5,0.75,1').split(',').map(Number);
 const extra = !process.argv.includes('--no-extra');
 const outDir = path.join(dir, '.shots', tag);
 fs.mkdirSync(outDir, { recursive: true });
-const url = 'file://' + path.join(dir, 'dev.html');
+const url = arg('url', 'file://' + path.join(dir, 'dev.html'));
 const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
 
 const VIEWS = [
@@ -47,6 +47,7 @@ for (const v of VIEWS) {
   console.log(v.name, 'state', state, `${Date.now() - t0}ms`);
   await page.evaluate(() => document.fonts.ready);
   await frames(page, 4);
+  await page.waitForTimeout(700); // poster → WebGL crossfade
   const rec = { state, shots: [], info: {}, logs };
   const seq = [...ps.map((p) => ['down', p]), ...[...ps].reverse().map((p) => ['up', p])];
   for (const [dirn, p] of seq) {

@@ -16,8 +16,8 @@ export const outerR = (y) => lerp(CUP.rb, CUP.rt, (y - CUP.y0) / (CUP.y1 - CUP.y
 export const innerR = (y) => outerR(y) - 0.016;
 
 export const PAL = {
-  mango: new Color('#F5961A'), mangoDeep: new Color('#E2700A'), cream: new Color('#FFC24D'),
-  chamoy: new Color('#6E1018'), chamoyHi: new Color('#9C1E1C'), tajin: new Color('#D9432B'),
+  mango: new Color('#F58A06'), mangoDeep: new Color('#D45604'), cream: new Color('#FFB52E'),
+  chamoy: new Color('#560A13'), chamoyHi: new Color('#8A171B'), tajin: new Color('#C93522'),
 };
 
 // ---------------------------------------------------------------- generic revolve grid (indexed, seamless)
@@ -82,10 +82,10 @@ function profileSampler(pts) {
 function clearPlastic(thickness, key) {
   const m = new MeshPhysicalMaterial({
     color: 0xffffff, metalness: 0, roughness: 0.06, transmission: 1, thickness, ior: 1.57,
-    specularIntensity: 1, envMapIntensity: 1.35, side: DoubleSide,
+    specularIntensity: 1, envMapIntensity: 2.6, side: DoubleSide,
     attenuationColor: new Color('#fff3ee'), attenuationDistance: 2.5,
   });
-  m.userData.u = { uHaze: { value: 0.012 }, uEdgeHaze: { value: 0.2 }, uHazeColor: { value: new Color(1, 0.97, 0.98) } };
+  m.userData.u = { uHaze: { value: 0.05 }, uEdgeHaze: { value: 0.3 }, uHazeColor: { value: new Color(0.42, 0.3, 0.36) } };
   return patch(m, {
     uniforms: m.userData.u,
     fragmentHead: 'uniform float uHaze; uniform float uEdgeHaze; uniform vec3 uHazeColor;',
@@ -125,8 +125,8 @@ function sorbetGeometry(rows, cols) {
   const pts = [[0, yb]];
   for (let i = 1; i <= 6; i++) pts.push([lerp(0, innerR(yb) - 0.05, i / 6), yb]);
   for (let i = 1; i <= 6; i++) { const a = (i / 6) * Math.PI / 2; pts.push([innerR(yb + 0.05) - 0.05 * Math.cos(a), yb + 0.05 * Math.sin(a)]); }
-  for (let i = 1; i <= 24; i++) { const y = lerp(yb + 0.05, ys, i / 24); pts.push([innerR(y), y]); }
-  const a0 = innerR(ys);
+  for (let i = 1; i <= 24; i++) { const y = lerp(yb + 0.05, ys, i / 24); pts.push([innerR(y) - 0.018, y]); }
+  const a0 = innerR(ys) - 0.018;
   for (let i = 1; i <= 30; i++) { const a = (i / 30) * Math.PI / 2; pts.push([a0 * Math.cos(a), ys + (peak - ys) * Math.sin(a)]); }
   const prof = profileSampler(pts);
   const pitch = 0.25;
@@ -145,21 +145,28 @@ function sorbetGeometry(rows, cols) {
     const wTip = smooth(clamp01(o.r / 0.1));
     const w = wBottom * wTip;
     const n1 = fbm(px0 * 2.6 + 7, o.y * 2.6, pz0 * 2.6, 3);
-    let disp = w * (0.05 * (bp - 1) + 0.013 * Math.cos(8 * th + 11 * o.L) * b);
-    disp += 0.03 * (n1 - 0.5) * (0.5 + 0.5 * w);
-    const r = Math.max(0, o.r + o.nr * disp);
-    out.x = r * sx; out.z = r * cz; out.y = o.y + o.ny * disp;
+    // twisted star-nozzle flutes (the swirl) + shallow piped layers + lumps
+    const fc = Math.cos(6 * th + o.L * 5.4 + 1.2 * (n1 - 0.5));
+    const flute = Math.sign(fc) * Math.pow(Math.abs(fc), 0.65);
+    let disp = w * (0.034 * flute + 0.013 * (bp - 1));
+    disp += 0.028 * (n1 - 0.5) * (0.5 + 0.5 * w);
+    const yy = o.y + o.ny * disp;
+    // pressed against the PET: never through the wall (flute crests flatten where they touch)
+    const r = Math.max(0, Math.min(o.r + o.nr * disp, innerR(Math.min(yy, 1.57)) - 0.006));
+    out.x = r * sx; out.z = r * cz; out.y = yy;
     const coil = Math.floor(phi);
     const streak = vnoise(coil * 1.7 + 0.3, Math.cos(th) * 1.4 + 3, Math.sin(th) * 1.4 + f * 1.2);
-    out.e[0] = (1 - b) * w;
+    const fIdx = Math.floor((6 * th + o.L * 5.4) / (Math.PI * 2) + 0.5);
+    const thr = 0.12 + 0.62 * vnoise(fIdx * 1.31 + 0.5, o.L * 1.6, 2.2);
+    out.e[0] = smooth(clamp01((-fc - thr) / 0.55)) * w; // chamoy rides the flute valleys, unevenly
     out.e[1] = streak;
     out.e[2] = clamp01((o.y - yb) / (peak - yb));
-    out.e[3] = n1;
+    out.e[3] = (1 - b) * w; // layer seams (occlusion only)
   }, 4);
 }
 
 function sorbetMaterial() {
-  const m = new MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.55, sheen: 0.28, sheenColor: new Color('#ffb04a'), sheenRoughness: 0.5, envMapIntensity: 0.75 });
+  const m = new MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.55, specularIntensity: 0.38, sheen: 0.08, sheenColor: new Color('#ff9a20'), sheenRoughness: 0.5, envMapIntensity: 0.22 });
   const u = {
     uMango: { value: PAL.mango }, uMangoDeep: { value: PAL.mangoDeep }, uCream: { value: PAL.cream },
     uChamoy: { value: PAL.chamoy }, uTajin: { value: PAL.tajin },
@@ -174,15 +181,16 @@ function sorbetMaterial() {
         float nA = zFbm(vObj * 4.0);
         float nB = zNoise(vObj * vec3(9.0, 3.0, 9.0) + 2.0);
         vec3 sc = mix(uMango, uMangoDeep, smoothstep(0.35, 0.85, nA));
-        sc = mix(sc, uCream, smoothstep(0.6, 0.85, vSorb.y) * 0.55 * smoothstep(0.2, 0.7, nB));
-        zGroove = smoothstep(0.3, 0.72, vSorb.x * (0.7 + 0.6 * nB));
+        sc *= 1.0 - 0.14 * smoothstep(0.45, 0.98, vSorb.w);
+        sc = mix(sc, uCream, smoothstep(0.55, 0.85, vSorb.y) * 0.45 * smoothstep(0.25, 0.75, nB));
+        zGroove = smoothstep(0.32, 0.78, vSorb.x * (0.65 + 0.7 * nB) + 0.35 * vSorb.w * smoothstep(0.55, 0.8, nA));
         sc = mix(sc, uChamoy * (0.75 + 0.5 * nA), zGroove);
         float fl = smoothstep(0.8, 0.86, zNoise(vObj * 64.0)) * (0.2 + 0.8 * max(zGroove, smoothstep(0.7, 1.0, vSorb.z)));
         sc = mix(sc, uTajin * 0.7, fl * 0.85);
         diffuseColor.rgb = sc;`,
       roughnessmap_fragment: 'roughnessFactor = mix(0.6, 0.12, zGroove) + (zNoise(vObj * 40.0) - 0.5) * 0.18;',
-      normal_fragment_maps: 'normal = zBump(-vViewPosition, normal, (zFbm(vObj * 26.0) * 0.006 + zNoise(vObj * 90.0) * 0.0012) * (1.0 - zGroove * 0.8));',
-      emissivemap_fragment: 'totalEmissiveRadiance += diffuseColor.rgb * 0.05 * (1.0 - zGroove);',
+      normal_fragment_maps: 'normal = zBump(-vViewPosition, normal, (zNoise(vObj * 15.0) * 0.004 + zNoise(vObj * 70.0) * 0.0009) * (1.0 - zGroove * 0.9));',
+      emissivemap_fragment: 'totalEmissiveRadiance += diffuseColor.rgb * 0.13 * (1.0 - zGroove);',
     },
   }, 'zaca-sorbet');
 }
@@ -197,7 +205,7 @@ function linerGeometry(segs) {
 function linerMaterial() {
   const m = new MeshPhysicalMaterial({
     color: 0xffffff, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.06, side: DoubleSide,
-    alphaTest: 0.5, alphaToCoverage: true, envMapIntensity: 1.1,
+    alphaTest: 0.5, alphaToCoverage: true, envMapIntensity: 0.75,
   });
   m.userData.u = { uDrip: { value: 1 }, uFresh: { value: 0 }, uChamoy: { value: PAL.chamoy }, uChamoyHi: { value: PAL.chamoyHi }, uTajin: { value: PAL.tajin } };
   const H = (LINER.y1 - LINER.y0).toFixed(4);
@@ -271,16 +279,16 @@ function banderillaGeometry(rows, cols) {
   return g;
 }
 function banderillaMaterial() {
-  const m = new MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.62, clearcoat: 0.35, clearcoatRoughness: 0.45, sheen: 0.5, sheenColor: new Color('#c8452e'), sheenRoughness: 0.7 });
+  const m = new MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.7, clearcoat: 0.25, clearcoatRoughness: 0.5, specularIntensity: 0.5, sheen: 0.45, sheenColor: new Color('#a02818'), sheenRoughness: 0.8, envMapIntensity: 0.3 });
   return patch(m, {
     vertexHead: 'attribute vec3 aExtra; varying vec3 vBand;',
     vertex: { begin_vertex: 'vBand = aExtra;' },
     fragmentHead: 'varying vec3 vBand;',
     fragment: {
       color_fragment: `
-        vec3 bc = mix(vec3(0.20, 0.035, 0.02), vec3(0.36, 0.07, 0.035), vBand.x);
-        bc = mix(bc, vec3(0.62, 0.12, 0.05), smoothstep(0.72, 0.8, vBand.y));
-        bc = mix(bc, vec3(0.09, 0.015, 0.01), smoothstep(0.3, 0.05, vBand.z) * 0.6);
+        vec3 bc = mix(vec3(0.16, 0.022, 0.016), vec3(0.3, 0.04, 0.025), vBand.x);
+        bc = mix(bc, vec3(0.58, 0.07, 0.03), smoothstep(0.66, 0.76, vBand.y));
+        bc = mix(bc, vec3(0.07, 0.012, 0.01), smoothstep(0.3, 0.05, vBand.z) * 0.6);
         diffuseColor.rgb = bc;`,
       roughnessmap_fragment: 'roughnessFactor = mix(0.75, 0.32, smoothstep(0.55, 0.85, vBand.x));',
     },
@@ -316,13 +324,13 @@ export function buildMangonada({ phone, maxAniso }) {
   const contactTex = makeRadialTexture([[0, 1], [0.45, 0.7], [0.8, 0.12], [1, 0]]);
   const shadowMat = new MeshBasicMaterial({ color: new Color('#6b1e3a'), alphaMap: shadowTex, transparent: true, depthWrite: false, opacity: 0.34 });
   const contactMat = new MeshBasicMaterial({ color: new Color('#4a0f26'), alphaMap: contactTex, transparent: true, depthWrite: false, opacity: 0.5 });
-  const shadow = new Mesh(new PlaneGeometry(2.6, 2.6), shadowMat);
-  shadow.rotation.x = -Math.PI / 2; shadow.position.set(0.12, 0.001, -0.05); shadow.scale.set(1.15, 0.9, 1);
+  const shadow = new Mesh(new PlaneGeometry(2.05, 2.05), shadowMat);
+  shadow.rotation.x = -Math.PI / 2; shadow.position.set(0.06, 0.001, -0.05); shadow.scale.set(1, 0.85, 1);
   const contact = new Mesh(new PlaneGeometry(1.2, 1.2), contactMat);
   contact.rotation.x = -Math.PI / 2; contact.position.y = 0.002;
   const causticMat = new MeshBasicMaterial({ color: new Color('#ff9a2a'), alphaMap: shadowTex, transparent: true, depthWrite: false, blending: AdditiveBlending, opacity: 0.0 });
-  const caustic = new Mesh(new PlaneGeometry(1.5, 1.5), causticMat);
-  caustic.rotation.x = -Math.PI / 2; caustic.position.set(-0.55, 0.003, 0.45); caustic.scale.set(1.2, 0.75, 1);
+  const caustic = new Mesh(new PlaneGeometry(1.2, 1.2), causticMat);
+  caustic.rotation.x = -Math.PI / 2; caustic.position.set(-0.38, 0.003, 0.32); caustic.scale.set(1.1, 0.7, 1);
   shadow.renderOrder = contact.renderOrder = caustic.renderOrder = 1;
   const floor = new Group();
   floor.add(shadow, contact, caustic);
@@ -352,7 +360,7 @@ export function buildMangonada({ phone, maxAniso }) {
   // mango cubes
   const R = rng(19);
   const nCubes = phone ? 26 : 34;
-  const cubeMat = new MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.3, clearcoat: 0.7, clearcoatRoughness: 0.2, sheen: 0.45, sheenColor: new Color('#ffc46b'), sheenRoughness: 0.45 });
+  const cubeMat = new MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.3, clearcoat: 0.45, clearcoatRoughness: 0.18, specularIntensity: 0.6, sheen: 0.15, sheenColor: new Color('#ffa030'), sheenRoughness: 0.45, envMapIntensity: 0.32 });
   patch(cubeMat, {
     uniforms: { uChamoy: { value: PAL.chamoy }, uTajin: { value: PAL.tajin } },
     vertexHead: 'attribute float aCoat; varying float vCoat; varying vec3 vCL;',
@@ -373,7 +381,7 @@ export function buildMangonada({ phone, maxAniso }) {
   const coat = new Float32Array(nCubes);
   const cubes = new InstancedMesh(cubeGeo, cubeMat, nCubes);
   cubes.instanceMatrix.setUsage(DynamicDrawUsage);
-  const mangoShades = ['#F7A21B', '#F59A0E', '#F9B235', '#F28A10', '#FDBB45', '#F6A825'].map((c) => new Color(c));
+  const mangoShades = ['#F59A12', '#F08A0C', '#F7A825', '#E87C0A', '#FAB232', '#F39612'].map((c) => new Color(c));
   const cubeData = [];
   for (let i = 0; i < nCubes; i++) {
     const s = 0.15 + R() * 0.06;
@@ -404,7 +412,7 @@ export function buildMangonada({ phone, maxAniso }) {
   // Tajín flakes
   const nT = phone ? 650 : 1100;
   const tGeo = new OctahedronGeometry(1, 0);
-  const tMat = new MeshStandardMaterial({ color: 0xffffff, roughness: 0.78, envMapIntensity: 0.8 });
+  const tMat = new MeshStandardMaterial({ color: 0xffffff, roughness: 0.78, envMapIntensity: 0.5 });
   const tajin = new InstancedMesh(tGeo, tMat, nT);
   tajin.instanceMatrix.setUsage(DynamicDrawUsage);
   const tShades = ['#D9432B', '#C9361F', '#E85A33', '#A82A1C', '#F0703E', '#B8301E'].map((c) => new Color(c));

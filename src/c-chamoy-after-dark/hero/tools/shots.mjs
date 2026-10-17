@@ -52,8 +52,9 @@ async function setP(page, p) {
     window.scrollTo(0, Math.round(s.offsetTop + p * max));
   }, p);
 }
-async function settle(page, ms = 900) {
+async function settle(page, ms = 900, p = null) {
   await page.waitForTimeout(ms);
+  await page.waitForFunction((p) => window.__hcPT === undefined || ((p === null || Math.abs(window.__hcPT - p) < 0.003) && window.__hcP === window.__hcPT), p, { timeout: 30000 }).catch(() => logs.push('p did not converge ' + p));
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
@@ -67,8 +68,8 @@ for (const v of VIEWS) {
   await settle(page, 1200);
   const state = await page.evaluate(() => document.querySelector('[data-hero]').className);
   logs.push(`[${v.name}] state: ${state}`);
-  for (const p of PS) { await setP(page, p); await settle(page); await page.screenshot({ path: path.join(OUT, `${v.name}-down-${String(p * 100).padStart(3, '0')}.png`) }); }
-  for (const p of [...PS].reverse()) { await setP(page, p); await settle(page); await page.screenshot({ path: path.join(OUT, `${v.name}-up-${String(p * 100).padStart(3, '0')}.png`) }); }
+  for (const p of PS) { await setP(page, p); await settle(page, 700, p); await page.screenshot({ path: path.join(OUT, `${v.name}-down-${String(p * 100).padStart(3, '0')}.png`) }); }
+  for (const p of [...PS].reverse()) { await setP(page, p); await settle(page, 700, p); await page.screenshot({ path: path.join(OUT, `${v.name}-up-${String(p * 100).padStart(3, '0')}.png`) }); }
   await ctx.close();
 
   if (skipExtra) continue;

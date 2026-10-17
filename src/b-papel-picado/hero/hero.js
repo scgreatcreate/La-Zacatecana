@@ -53,12 +53,12 @@ function boot() {
     const o = 1 - smooth(span(p, 0.03, 0.17));
     copy.style.opacity = o.toFixed(3);
     copy.style.transform = `translate3d(0, ${(-56 * smooth(span(p, 0.02, 0.2))).toFixed(1)}px, 0)`;
-    copy.style.visibility = o < 0.01 ? 'hidden' : '';
+    copy.style.visibility = o < 0.01 ? 'hidden' : 'visible';
     if (outro) {
       const oo = smooth(span(p, 0.86, 0.97));
       outro.style.opacity = oo.toFixed(3);
       outro.style.transform = `translate3d(0, ${((1 - oo) * 22).toFixed(1)}px, 0)`;
-      outro.style.visibility = oo < 0.01 ? 'hidden' : '';
+      outro.style.visibility = oo < 0.01 ? 'hidden' : 'visible';
       outro.toggleAttribute('aria-hidden', oo < 0.5);
     }
     if (seam) seam.style.opacity = smooth(span(p, 0.88, 1)).toFixed(3);
@@ -142,7 +142,7 @@ function boot() {
     return { left: rr.left - s.left, right: rr.right - s.left, top: rr.top - s.top, bottom: rr.bottom - s.top, width: r.width };
   };
 
-  createScene({ canvas, stage, phone, getCopyRect: copyRect }).then((s) => {
+  createScene({ canvas, stage, phone, getCopyRect: copyRect, assetBase: section.dataset.assetBase || 'assets/' }).then((s) => {
     sceneApi = s;
     if (api.static) { s.dispose(); sceneApi = null; return; }
     st = ScrollTrigger.create({

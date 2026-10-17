@@ -49,12 +49,14 @@ uniform vec2 uVelTexel;
 uniform float uDt; uniform float uDiss; uniform float uTime;
 uniform vec4 uPool;      // x: pool surface (uv y), y: target thickness, z: refill rate, w: enabled
 uniform vec3 uPoolCol;
+uniform sampler2D uNeon; uniform vec4 uNeonRect; uniform float uNeonDiss;
 void main () {
   vec2 coord = vUv - uDt * texture(uVelocity, vUv).xy * uVelTexel;
-  vec4 r = texture(uSource, coord) / (1.0 + uDiss * uDt);
+  float m = uNeonDiss > 0.0 ? textureLod(uNeon, (vUv - uNeonRect.xy) / uNeonRect.zw, 2.0).r : 0.0;
+  vec4 r = texture(uSource, coord) / (1.0 + (uDiss + m * uNeonDiss) * uDt);
   if (uPool.w > 0.5) {
     float top = uPool.x + 0.006 * sin(vUv.x * 9.0 + uTime * 0.8) + 0.004 * sin(vUv.x * 23.0 - uTime * 1.3);
-    float inPool = smoothstep(top + 0.004, top - 0.035, vUv.y);
+    float inPool = smoothstep(top + 0.002, top - 0.01, vUv.y);
     float k = clamp((uPool.y * inPool - r.a) * uPool.z * uDt, 0.0, 1.0);
     r += k * vec4(uPoolCol, 1.0);
   }
@@ -73,7 +75,8 @@ void main () {
 export const FORCES = FS(`
 uniform sampler2D uVelocity; uniform sampler2D uCurl; uniform sampler2D uDye; uniform sampler2D uNeon;
 uniform float uCurlK; uniform float uDt; uniform float uGrav; uniform float uDrain; uniform float uDrag;
-uniform float uNeonLod; uniform vec2 uTexel;
+uniform float uNeonLod; uniform vec2 uTexel; uniform vec4 uNeonRect;
+uniform vec2 uPoolV;   // x: pool surface (uv y), y: viscous damping inside the pool
 void main () {
   float L = texture(uCurl, vL).x; float R = texture(uCurl, vR).x;
   float T = texture(uCurl, vT).x; float B = texture(uCurl, vB).x;
@@ -84,8 +87,10 @@ void main () {
   vec2 v = texture(uVelocity, vUv).xy + f * uDt;
   float h = texture(uDye, vUv).a;
   v.y -= (uGrav * min(h, 1.6) + uDrain) * uDt;
-  float m = clamp(textureLod(uNeon, vUv, uNeonLod).r * 3.0, 0.0, 1.0);
+  float m = clamp(textureLod(uNeon, (vUv - uNeonRect.xy) / uNeonRect.zw, uNeonLod).r * 3.0, 0.0, 1.0);
   v *= exp(-m * uDrag * uDt);
+  float inPool = smoothstep(uPoolV.x + 0.02, uPoolV.x - 0.06, vUv.y);
+  v *= exp(-inPool * uPoolV.y * uDt);
   if (vUv.y < uTexel.y * 1.5) v.y = max(v.y, 0.0);
   if (vUv.x < uTexel.x * 1.5) v.x = max(v.x, 0.0);
   if (vUv.x > 1.0 - uTexel.x * 1.5) v.x = min(v.x, 0.0);
@@ -130,7 +135,7 @@ void main () { vec4 t = texture(uSeed, vUv); float a = t.a * uK; o = vec4(t.rgb 
 // meniscus of the draining liquid (pure function of uLevel = f(scroll) + ambient time)
 const SURF = `
 uniform float uLevel; uniform float uTime; uniform vec2 uRes; uniform float uPx;
-uniform float uStreamX; uniform float uMound;
+uniform float uStreamX; uniform float uMound; uniform float uShiftBg;
 float surfY (float x) {
   float a = 5.5 * uPx / uRes.y;
   float s = uLevel + a * sin(x * 7.0 + uTime * 1.1) + a * 0.6 * sin(x * 17.0 - uTime * 1.7 + 1.3)
@@ -146,17 +151,18 @@ float nightMask (vec2 uv) {
 
 const NEON = `
 uniform sampler2D uNeon;
+uniform vec4 uNeonRect;  // where the neon texture sits on the canvas (uv: x, y, w, h)
 uniform vec4 uNeonI;   // x: "La", y: "Zacatecana", z: stuttering letter id, w: stutter depth
 const vec3 PINK = vec3(1.0, 0.31, 0.64);
 vec4 neonAt (vec2 uv, float lod) {
-  vec4 t = textureLod(uNeon, uv, lod);
+  vec4 t = textureLod(uNeon, (uv - uNeonRect.xy) / uNeonRect.zw, lod);
   float tube = t.r;
   if (tube < 0.002) return vec4(0.0);
   float id = floor(t.b / tube * 255.0 / 16.0 + 0.5) - 1.0;
   float I = id < 1.5 ? uNeonI.x : uNeonI.y;
   if (abs(id - uNeonI.z) < 0.5) I *= 1.0 - uNeonI.w;
   float core = clamp(t.g / tube, 0.0, 1.0);
-  vec3 lit = mix(PINK * 1.2, vec3(1.0, 0.93, 0.97) * 1.45, smoothstep(0.1, 0.9, core));
+  vec3 lit = mix(PINK * 1.05, vec3(1.0, 0.9, 0.96) * 1.18, smoothstep(0.25, 0.95, core));
   vec3 glass = mix(vec3(0.17, 0.10, 0.15), vec3(0.36, 0.25, 0.31), core);
   return vec4(tube * mix(glass, lit, I), tube * I);
 }`;
@@ -176,7 +182,7 @@ void main () {
   float life = 5.0 + 8.0 * hash(id * 3.17);
   if (age > life || p.y < -0.01 || p.y > 1.02 || p.x < -0.01 || p.x > 1.01) {
     float r1 = hash(id * 12.9898 + uSeedT * 1.7), r2 = hash(id * 78.233 + uSeedT * 3.1), r3 = hash(id * 4.1 + uSeedT * 0.37);
-    if (r3 < 0.5) p = vec2(r1, r2 * uPoolY);
+    if (r3 < 0.22) p = vec2(r1, r2 * uPoolY);
     else if (r3 < 0.68 && uSpawn.w > 0.5) p = vec2(uSpawn.x + (r1 - 0.5) * uSpawn.z, uSpawn.y - r2 * 0.06);
     else p = vec2(r1, r2);
     age = 0.0;
@@ -199,11 +205,11 @@ void main () {
   float life = 5.0 + 8.0 * hash(s.w * 3.17);
   float fade = smoothstep(0.0, 0.5, s.z) * (1.0 - smoothstep(life - 0.7, life, s.z));
   float r = hash(s.w * 91.7);
-  vA = smoothstep(0.16, 0.6, h) * fade * nightMask(sp) * (sp.y < 1.0 ? 1.0 : 0.0);
+  vA = smoothstep(0.22, 0.6, h) * fade * nightMask(sp) * (sp.y < 1.0 ? 1.0 : 0.0);
   vC = mix(vec3(0.894, 0.341, 0.180), vec3(0.50, 0.08, 0.04), hash(s.w * 17.3));
   vC = mix(vC, vec3(1.0, 0.55, 0.16), step(0.82, hash(s.w * 5.9)));
   float tw = sin(uTime * (3.0 + 5.0 * r) + s.w * 40.0);
-  vS = uGlint * step(0.7, r) * pow(max(tw, 0.0), 24.0);
+  vS = uGlint * step(0.8, r) * pow(max(tw, 0.0), 30.0);
   vR = hash(s.w * 2.3) * 6.283;
   gl_Position = vec4(sp * 2.0 - 1.0, 0.0, 1.0);
   gl_PointSize = uPointPx * (0.65 + 0.9 * hash(s.w * 7.7)) * (1.0 + vS * 0.6);
@@ -227,8 +233,8 @@ export const B_EMIT = FS(`
 ${SURF}
 ${NEON}
 void main () {
-  vec4 n = neonAt(vUv, 1.0);
-  vec3 e = n.a * mix(PINK, vec3(1.0, 0.86, 0.93), 0.3);
+  vec4 n = neonAt(vUv + vec2(0.0, uShiftBg), 1.0);
+  vec3 e = n.a * PINK;
   o = vec4(e * nightMask(vUv), 1.0);
 }`);
 
@@ -259,7 +265,7 @@ uniform vec2 uDyeTexel; uniform float uShift; uniform float uBloomK;
 uniform vec4 uCopy; uniform float uCopyK;      // copy-safe rect (css px, top-left) + strength
 uniform float uDiv[24]; uniform float uDivN;   // liquid divider x (uv), top -> bottom
 uniform vec4 uStream;                          // x: half width (css px), y: visibility, z: bead speed
-uniform float uDrip;
+uniform float uDrip; uniform float uDripS;
 ${SURF}
 ${NEON}
 const vec3 CHAMOY = vec3(0.70, 0.07, 0.18);
@@ -287,16 +293,20 @@ float copyMask (vec2 uv) {
 
 // glossy syrup: Beer-Lambert body over what is behind + sharp key highlight + neon-tinted reflections
 vec3 syrup (vec3 behind, vec3 col, float H, vec3 n, vec3 glow) {
-  vec3 T = exp(-((1.0 - col) * 2.5 + 0.1) * H * 1.35);
-  vec3 body = behind * T + col * (1.0 - T) * (0.24 + 0.9 * dot(glow, vec3(0.3333)));
+  vec3 T = exp(-((1.0 - col) * 2.4 + 0.1) * H * 1.3);
+  vec3 tint = pow(max(col, vec3(0.001)), vec3(0.88, 1.12, 1.3)) * mix(1.25, 0.58, smoothstep(0.5, 2.8, H));
+  vec3 body = behind * T + tint * (1.0 - T) * (0.82 + 1.4 * dot(glow, vec3(0.3333)));
+  // key light (upper left) + a soft fill from the lower right
   vec3 hv = normalize(vec3(-0.42, 0.68, 0.6) + vec3(0.0, 0.0, 1.0));
   float nh = max(dot(n, hv), 0.0);
-  float spec = pow(nh, 120.0) * 1.5 + pow(nh, 26.0) * 0.14;
-  vec3 hv2 = normalize(vec3(0.5, -0.2, 0.84) + vec3(0.0, 0.0, 1.0));
-  spec += pow(max(dot(n, hv2), 0.0), 60.0) * 0.35;
-  float fres = pow(1.0 - clamp(n.z, 0.0, 1.0), 2.5) * 0.55;
-  vec3 env = vec3(1.0, 0.88, 0.92) + glow * 2.2;
-  return body + (spec + fres * 0.6) * env;
+  float spec = pow(nh, 70.0) * 1.25 + pow(nh, 16.0) * 0.12;
+  vec3 hv2 = normalize(vec3(0.5, -0.25, 0.83) + vec3(0.0, 0.0, 1.0));
+  spec += pow(max(dot(n, hv2), 0.0), 40.0) * 0.25;
+  // environment: slopes that face up mirror the neon sign above, slopes that face down see the dark street
+  vec3 r = vec3(2.0 * n.z * n.x, 2.0 * n.z * n.y, 2.0 * n.z * n.z - 1.0);
+  float fres = 0.05 + 0.95 * pow(1.0 - clamp(n.z, 0.0, 1.0), 4.0);
+  vec3 env = mix(vec3(0.04, 0.012, 0.02), vec3(0.72, 0.2, 0.17) + glow * 1.4, smoothstep(0.02, 0.55, r.y));
+  return body + spec * (vec3(1.0, 0.9, 0.9) + glow * 0.6) + env * fres * 0.55;
 }
 
 void main () {
@@ -313,21 +323,24 @@ void main () {
   float lip = uLevel < 1.03 ? 1.15 * exp(-max(below, 0.0) / 15.0) : 0.0;
   vec2 glip = vec2(dFdx(lip), dFdy(lip)) * uPx;
   // drips: rivulets left behind on the glass while it drains (attached to the meniscus = pure f(scroll))
-  float cw = 23.0;
+  float cw = 31.0 * uDripS;
   float ci = floor(cpx.x / cw);
   float r0 = hash2(vec2(ci, 3.7)), r1 = hash2(vec2(ci, 9.1)), r2 = hash2(vec2(ci, 1.3));
   float dH = 0.0;
-  if (r0 > 0.42 && uDrip > 0.0) {
-    float L = (18.0 + 170.0 * r1 * r1) * uDrip;
-    float w = 1.5 + 2.6 * r2;
-    float cx = (ci + 0.5 + (r2 - 0.5) * 0.45) * cw;
+  if (r0 > 0.38 && uDrip > 0.0) {
+    float L = (10.0 + 62.0 * r1 * r1) * uDrip * uDripS; // rivulet length (css px)
+    float w = (2.2 + 2.6 * r2) * uDripS;                // neck half-width
+    float bulb = w * 1.55;                              // rounded drop at the trailing end
+    float cx = (ci + 0.5 + (r2 - 0.5) * 0.4) * cw;
     float ddx = cpx.x - cx;
     float t = clamp(up / max(L, 1.0), 0.0, 1.0);
-    float hw2 = w * (1.0 - 0.5 * t) + 5.0 * exp(-max(up, 0.0) / 4.0);
+    float hw2 = mix(w * 1.25, w * 0.8, t) + 7.0 * uDripS * exp(-max(up, 0.0) / (5.0 * uDripS));   // fillet
     float k = 1.0 - ddx * ddx / (hw2 * hw2);
-    float tipY = L - hw2;
-    if (up > tipY) { float dy = up - tipY; k = 1.0 - (ddx * ddx + dy * dy) / (hw2 * hw2); }
-    dH = max(k, 0.0) * step(-1.0, up);
+    float by = L - bulb * 0.4;                          // drop centre
+    float dy = up - by;
+    float kb = 1.0 - (ddx * ddx + dy * dy) / (bulb * bulb);
+    k = up < by ? k : -1.0;
+    dH = max(max(k, kb), 0.0) * step(-1.0, up);
   }
   vec2 gdrip = vec2(dFdx(dH), dFdy(dH)) * uPx;
 
@@ -349,12 +362,18 @@ void main () {
     float Hh = max(h, lip);
     col = mix(col, CHAMOY, smoothstep(0.0, 0.25, lip - h));
     vec2 grad = g + glip;
-    float cover = smoothstep(0.035, 0.2, Hh);
-    vec3 n = normalize(vec3(-grad * 10.0, 1.0));
+    float cover = smoothstep(0.1, 0.26, Hh);                // crisp liquid edge, no smoky film
+    vec2 rp = cpx * vec2(0.055, 0.09);
+    vec2 ripple = vec2(sin(rp.x + uTime * 1.3 + 2.0 * sin(rp.y * 0.7 + uTime * 0.4)), cos(rp.y * 1.3 - uTime * 1.1 + 1.7 * sin(rp.x * 0.6)));
+    grad += ripple * 0.009 * smoothstep(0.9, 1.6, Hh);
+    vec3 n = normalize(vec3(-grad * 12.0, 1.0));
     vec2 refr = n.xy * 0.022 * cover * vec2(1.0, cssRes.x / cssRes.y);
-    vec3 bg = texture(uBg, uv + refr).rgb;
-    bg += neonAt(uv + refr, 0.0).rgb;
+    vec2 buv = uv + refr + vec2(0.0, uShiftBg);
+    vec3 bg = texture(uBg, buv).rgb;
+    vec3 neon = neonAt(buv, 0.0).rgb;
+    bg += neon;
     vec3 liq = syrup(bg, col, Hh, n, glow);
+    liq += neon * 0.5 * smoothstep(0.3, 1.2, dot(neon, vec3(0.3333)));   // the tubes still burn through the syrup
     liq = mix(liq, liq * 0.4, copyMask(uv) * uCopyK * (1.0 - smoothstep(0.0, 0.5, lip)));
     A = mix(bg, liq, cover);
     A += glow * (1.0 - 0.45 * cover);

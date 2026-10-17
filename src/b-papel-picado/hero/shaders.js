@@ -2,7 +2,7 @@
 // Everything shades in linear space and writes sRGB itself (no renderer tone mapping),
 // so flat brand colours (yellow wall, pink counter) land on their exact hex values.
 
-export const MAX_STR = 8; // half-strings (4 strings × 2 halves)
+export const MAX_STR = 10; // half-strings: 4 outdoor strings × 2 halves + 1 string inside the shop × 2
 
 const COMMON = /* glsl */ `
 vec3 toLin(vec3 c){ return pow(max(c, 0.0), vec3(2.2)); }
@@ -13,8 +13,12 @@ float vnoise(vec2 x){
   vec2 i = floor(x), f = fract(x); vec2 u = f*f*(3.0-2.0*f);
   return mix(mix(hash21(i), hash21(i+vec2(1,0)), u.x), mix(hash21(i+vec2(0,1)), hash21(i+vec2(1,1)), u.x), u.y);
 }
-// soft shoulder so the sunlit wall never clips harshly
-vec3 shoulder(vec3 c){ return c / (1.0 + max(c - 0.82, 0.0) * 1.6); }
+// soft shoulder on the brightest channel: highlights roll off without bleaching the hue
+vec3 shoulder(vec3 c){
+  float l = max(max(c.r, c.g), c.b);
+  float l2 = l / (1.0 + max(l - 0.8, 0.0) * 1.5);
+  return c * (l2 / max(l, 1e-4));
+}
 `;
 
 // ------------------------------------------------------------------ flags (cloth)
@@ -22,11 +26,13 @@ const FLAG_HEAD = /* glsl */ `
 attribute vec2 iT;      // t0,t1 along the half-string curve
 attribute vec4 iTile;   // atlas rect (u0, v0, du, dv)
 attribute vec3 iCol;    // tissue colour (linear)
-attribute vec4 iMisc;   // x string index, y seed, z flag height (m), w kind (0 motif, 1 letter)
+attribute vec4 iMisc;   // x string index, y seed, z flag height (m), w flag width (m)
 uniform vec3 uA[${MAX_STR}];
 uniform vec3 uC[${MAX_STR}];
 uniform vec3 uE[${MAX_STR}];
 uniform float uFl[${MAX_STR}];
+uniform float uLv[${MAX_STR}];
+uniform float uGa[${MAX_STR}];
 uniform float uTime;
 uniform float uWind;
 uniform vec3 uPtrO;
@@ -40,9 +46,24 @@ varying vec4 vMisc;
 
 vec3 bez(int s, float t){ float r = 1.0 - t; return r*r*uA[s] + 2.0*r*t*uC[s] + t*t*uE[s]; }
 
+vec3 bezD(int s, float t){ return 2.0*(1.0-t)*(uC[s]-uA[s]) + 2.0*t*(uE[s]-uC[s]); }
+// a flag is a rigid sheet hung at its centre on the cord; its top edge follows the cord's slope but
+// pivots toward level (uLv) so it never shears. When a half is gathered (uGa) the sheets overlap like
+// a drawn curtain, fanned slightly in depth (sheets nearer the centre in front).
+vec3 flagTop(int s, float u){
+  float tc = 0.5 * (iT.x + iT.y);
+  vec3 c = bez(s, tc);
+  vec3 tg = bezD(s, tc);
+  tg = normalize(tg + vec3(1e-5, 0.0, 0.0));
+  tg *= tg.x < 0.0 ? -1.0 : 1.0;
+  vec3 dir = normalize(mix(tg, vec3(1.0, 0.0, 0.0), uLv[s]));
+  vec3 p = c + dir * ((u - 0.5) * iMisc.w);
+  p.z += uGa[s] * tc * 0.16;
+  return p;
+}
+
 vec3 flagPos(vec2 uv, int s){
-  float t = mix(iT.x, iT.y, uv.x);
-  vec3 top = bez(s, t);
+  vec3 top = flagTop(s, uv.x);
   float h = iMisc.z;
   float v = uv.y;
   float w = pow(v, 1.25);
@@ -148,7 +169,7 @@ void main(){
   vec3 p = flagPos(position.xy, s);
   vUV = position.xy; vTile = iTile; vCol = iCol; vMisc = iMisc;
   vD = clamp(p.z / 3.2, 0.0, 1.0);
-  gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
+  gl_Position = s >= 8 ? vec4(2.0, 2.0, 2.0, 1.0) : projectionMatrix * viewMatrix * vec4(p, 1.0);
 }`;
 
 export const FLAG_SH_FS = /* glsl */ `
@@ -164,7 +185,7 @@ void main(){
   float cov = smoothstep(0.32, 0.68, m);
   if (cov < 0.01) discard;
   // tissue transmits its own hue strongly; doubled header transmits less
-  vec3 tr = pow(vCol, vec3(0.72)) * 0.8 + 0.03;
+  vec3 tr = pow(vCol, vec3(0.88)) * 0.9 + 0.02;
   float hdr = 1.0 - step(uHeader, vUV.y);
   tr = mix(tr, tr * tr * 1.05, hdr);
   gl_FragColor = vec4(mix(vec3(1.0), tr, cov), vD);
@@ -223,7 +244,7 @@ void main(){
   float side;
   vec3 p = cordPos(side);
   vD = clamp(p.z / 3.2, 0.0, 1.0);
-  gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
+  gl_Position = position.z > 7.5 ? vec4(2.0, 2.0, 2.0, 1.0) : projectionMatrix * viewMatrix * vec4(p, 1.0);
 }`;
 export const CORD_SH_FS = /* glsl */ `
 varying float vD;
@@ -282,9 +303,9 @@ void main(){
   // flow banding typical of ignimbrite (cantera): stretched noise
   float mott = fbmP(uv * vec2(3.0, 6.0) + vec2(0.0, fbmP(uv * 4.0, vec2(4.0), 3) * 0.6), vec2(3.0, 6.0), 5);
   float grain = fbmP(uv * 48.0, vec2(48.0), 4);
-  float pores = cellsP(uv * 90.0, vec2(90.0), 0.38, 0.12, 0.36);
-  pores = max(pores, cellsP(uv * 34.0 + 0.5, vec2(34.0), 0.16, 0.08, 0.22) );
-  float clasts = cellsP(uv * 60.0 + 0.25, vec2(60.0), 0.3, 0.12, 0.4) * smoothstep(0.35, 0.7, vnP(uv * 12.0, vec2(12.0)));
+  float pores = cellsP(uv * 110.0, vec2(110.0), 0.3, 0.1, 0.3);
+  pores = max(pores, cellsP(uv * 34.0 + 0.5, vec2(34.0), 0.08, 0.06, 0.16) * 0.8);
+  float clasts = cellsP(uv * 70.0 + 0.25, vec2(70.0), 0.18, 0.1, 0.3) * smoothstep(0.45, 0.75, vnP(uv * 9.0, vec2(9.0)));
   gl_FragColor = vec4(mott, grain, pores, clasts);
 }`;
 
@@ -360,9 +381,9 @@ vec4 masonry(vec2 p){
     if (q.y > 0.0 && bw > 0.45) h += 0.25; // keystone stands proud
   } else {
     // ashlar coursing
-    float ch = 0.42;
+    float ch = 0.48;
     float row = floor(p.y / ch);
-    float L = mix(0.62, 1.02, hash11(row * 1.73 + 3.0));
+    float L = mix(0.78, 1.32, hash11(row * 1.73 + 3.0));
     float off = hash11(row * 3.11 + 1.0) * L;
     float col = floor((p.x + off) / L);
     vec2 lp = vec2(fract((p.x + off) / L) * L, fract(p.y / ch) * ch);
@@ -378,15 +399,15 @@ vec4 masonry(vec2 p){
     band = 1.0;
     je = min(je, min(abs(p.y - uWin.z + 0.13), abs(p.y - uWin.z + 0.0)) + 0.004);
   }
-  float face = smoothstep(0.004, 0.024, je);
-  joint = mix(0.55, 1.0, smoothstep(0.0, 0.03, je));
+  float face = smoothstep(0.003, 0.018, je);
+  joint = mix(0.62, 1.0, smoothstep(0.0, 0.022, je));
   return vec4(h * face, id, band, joint);
 }
 
 float heightAt(vec2 p, vec2 suv){
   vec4 m = masonry(p);
   vec4 st = texture2D(uStone, suv);
-  return m.x + (st.g - 0.5) * 0.22 - st.b * 0.35;
+  return m.x + (st.g - 0.5) * 0.34 - st.b * 0.2;
 }
 
 void main(){
@@ -412,7 +433,7 @@ void main(){
     float h0 = heightAt(p, suv);
     float hx = heightAt(p + vec2(e, 0.0), (p + vec2(e, 0.0)) / 2.7);
     float hy = heightAt(p + vec2(0.0, e), (p + vec2(0.0, e)) / 2.7);
-    N = normalize(vec3(-(hx - h0) / e * 0.016, -(hy - h0) / e * 0.016, 1.0));
+    N = normalize(vec3(-(hx - h0) / e * 0.02, -(hy - h0) / e * 0.02, 1.0));
   } else {
     float h0 = (st.g - 0.5) * 0.22 - st.b * 0.35;
     N = normalize(Ng + (vec3(dFdx(h0), dFdy(h0), 0.0)) * 0.0);
@@ -424,12 +445,17 @@ void main(){
   vec3 cMauve = toLin(vec3(0.80, 0.57, 0.62));
   vec3 cPale = toLin(vec3(0.90, 0.71, 0.70));
   vec3 alb = c0;
-  alb = mix(alb, cWarm, smoothstep(0.55, 1.0, bh) * 0.8);
-  alb = mix(alb, cMauve, smoothstep(0.45, 0.0, bh) * 0.7);
-  alb = mix(alb, cPale, m.z * 0.45);
-  alb *= 0.9 + 0.2 * (st.r * 0.6 + st2.r * 0.4);
-  alb = mix(alb, alb * toLin(vec3(0.62, 0.42, 0.45)), st.b * 0.85);
-  alb = mix(alb, toLin(vec3(0.97, 0.88, 0.84)), st.a * 0.55);
+  alb = mix(alb, cWarm, smoothstep(0.6, 1.0, bh) * 0.55);
+  alb = mix(alb, cMauve, smoothstep(0.4, 0.0, bh) * 0.5);
+  alb = mix(alb, cPale, m.z * 0.4 + smoothstep(0.35, 0.65, bh) * 0.15);
+  alb *= 0.84 + 0.32 * (st.r * 0.5 + st2.r * 0.5);
+  alb *= 0.93 + 0.14 * fract(m.y * 13.7);
+  // weathering: soft darker blooms and pale salt bloom that differ block to block
+  float wth = vnoise(p * 1.7 + m.y * 31.0);
+  alb *= mix(1.0, 0.86, smoothstep(0.62, 0.9, wth) * step(0.45, fract(m.y * 5.3)));
+  alb = mix(alb, alb * 1.08 + 0.015, smoothstep(0.7, 0.95, vnoise(p * 3.1 - m.y * 17.0)) * 0.6);
+  alb = mix(alb, alb * toLin(vec3(0.66, 0.48, 0.52)), st.b * 0.7);
+  alb = mix(alb, toLin(vec3(0.97, 0.87, 0.83)), st.a * 0.32);
   alb *= uAlb;
   // weathering: a little darker toward the ground
   alb *= mix(0.86, 1.0, smoothstep(-0.5, 2.2, vW.y));
@@ -442,8 +468,13 @@ void main(){
     float inside = step(0.002, s.x) * step(s.x, 0.998) * step(0.002, s.y) * step(s.y, 0.998);
     vec4 a = texture2D(uShA, s);
     vec4 b = texture2D(uShB, s);
-    float far = b.a;
-    vec3 TT = mix(a.rgb, b.rgb, clamp(uSoft + far * 1.1, 0.0, 1.0));
+    // occluder distance: from the crisp map where there is tissue, else from the blurred one
+    float zEst = a.a < 0.999 ? a.a : b.a;
+    float w = smoothstep(0.04, 0.42, zEst) * 0.8 + uSoft;
+    vec3 TT = mix(a.rgb, b.rgb, clamp(w, 0.0, 1.0));
+    // light through dyed tissue reads richer than a plain multiply: push its saturation a little
+    float lt = dot(TT, vec3(0.3, 0.5, 0.2));
+    TT = max(mix(vec3(lt), TT, 1.35), 0.0);
     T = mix(vec3(1.0), TT, inside);
   }
   // sill shadow on the wall below it
@@ -463,7 +494,11 @@ void main(){
   }
   float ndl = max(dot(N, uL), 0.0);
   vec3 amb = uSky * (0.62 + 0.38 * N.y) + uBounce * (0.5 - 0.5 * N.y);
-  vec3 col = alb * (uKey * ndl * T * sh + amb * m.w);
+  if (uIsJamb > 0.5) amb += uKey * 0.2 * (1.0 - ndl);
+  // coloured light on pink stone goes muddy if multiplied straight; let the tinted part see a more neutral stone
+  float tint = 1.0 - min(min(T.r, T.g), T.b);
+  vec3 albD = mix(alb, vec3(dot(alb, vec3(0.3, 0.55, 0.15))) * 1.12, 0.5 * tint);
+  vec3 col = albD * uKey * ndl * T * sh + alb * amb * m.w;
   vec2 sp = gl_FragCoord.xy / uRes - 0.5;
   col *= 1.0 - uVig * dot(sp, sp);
   gl_FragColor = vec4(toSRGB(shoulder(col)), 1.0);
@@ -495,12 +530,21 @@ void main(){
     // the sunflower logo wall
     col = uYellow * paint;
     float wash = exp(-pow((vW.x - (uMin.x + uMax.x) * 0.5) / 3.2, 2.0)) * smoothstep(uMin.y, uMax.y, vW.y + 0.6);
-    col *= 0.86 + 0.2 * wash;
+    col *= 0.84 + 0.16 * wash;
+    // recessed downlights graze the wall in soft scallops
+    float sc = 0.0;
+    for (int i = -2; i <= 2; i++) {
+      float lx = (uMin.x + uMax.x) * 0.5 + float(i) * 1.55;
+      float dxl = vW.x - lx;
+      float yTopS = uMax.y - 0.28 - dxl * dxl * 1.9;
+      sc += smoothstep(yTopS + 0.05, yTopS - 0.5, vW.y) * exp(-dxl * dxl * 1.1) * smoothstep(-0.4, 1.4, vW.y);
+    }
+    col *= 0.9 + 0.22 * sc;
     vec2 mu = (vW.xy - uMarkRect.xy) / uMarkRect.zw;
     if (mu.x > 0.0 && mu.x < 1.0 && mu.y > 0.0 && mu.y < 1.0) {
-      vec4 mk = texture2D(uMark, vec2(mu.x, 1.0 - mu.y));
+      vec4 mk = texture2D(uMark, mu);
       // painted-on decal, a whisper of shadow below the white outline
-      vec4 sh = texture2D(uMark, vec2(mu.x - 0.002, 1.0 - mu.y + 0.012));
+      vec4 sh = texture2D(uMark, mu + vec2(-0.002, 0.03));
       col *= 1.0 - sh.a * 0.12;
       col = mix(col, toLin(mk.rgb) * (0.94 + 0.08 * wash), mk.a);
     }
@@ -545,6 +589,8 @@ uniform float uExpo;
 uniform vec2 uRes;
 uniform float uVig;
 uniform float uFlat;
+uniform vec4 uProd[4];  // x, z, radius x, radius z
+uniform float uProdOn;
 varying vec3 vW;
 varying vec3 vNo;
 void main(){
@@ -553,6 +599,12 @@ void main(){
   if (n.y > 0.5) {
     // white quartz-look top
     col = uTop * (0.92 + 0.06 * vnoise(vW.xz * 18.0));
+    float occ = 0.0;
+    for (int i = 0; i < 4; i++) {
+      vec2 d = (vW.xz - uProd[i].xy) / uProd[i].zw;
+      occ = max(occ, exp(-dot(d, d) * 2.2));
+    }
+    col *= 1.0 - 0.45 * occ * uProdOn;
   } else {
     col = uPink;
     float y = vW.y;
@@ -565,4 +617,30 @@ void main(){
   vec2 sp = gl_FragCoord.xy / uRes - 0.5;
   col *= 1.0 - uVig * (1.0 - uFlat) * dot(sp, sp);
   gl_FragColor = vec4(toSRGB(col), 1.0);
+}`;
+
+// ------------------------------------------------------------------ product cutouts standing on the counter
+export const PROD_VS = /* glsl */ `
+attribute vec4 iRect;   // atlas rect (u0, v0 from top, du, dv)
+attribute vec4 iPos;    // x, base y, z, height
+attribute float iAsp;   // width / height
+varying vec2 vUv;
+void main(){
+  vec2 c = position.xy;  // (0..1, 0..1)
+  vec3 p = vec3(iPos.x + (c.x - 0.5) * iPos.w * iAsp, iPos.y + c.y * iPos.w, iPos.z);
+  vUv = vec2(iRect.x + c.x * iRect.z, iRect.y + (1.0 - c.y) * iRect.w);
+  gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
+}`;
+export const PROD_FS = /* glsl */ `
+${COMMON}
+uniform sampler2D uTex;
+uniform float uExpo;
+uniform float uFade;
+varying vec2 vUv;
+void main(){
+  vec4 t = texture2D(uTex, vUv);
+  float a = smoothstep(0.35, 0.65, t.a) * uFade;
+  if (a < 0.02) discard;
+  vec3 c = toLin(t.rgb) * (0.96 * uExpo + 0.06);
+  gl_FragColor = vec4(toSRGB(c), a);
 }`;

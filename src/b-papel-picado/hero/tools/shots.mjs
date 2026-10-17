@@ -38,7 +38,7 @@ async function gotoP(page, p) {
     const y = top + p * (s.offsetHeight - innerHeight);
     window.scrollTo(0, Math.round(y));
   }, p);
-  await page.waitForFunction(() => window.__heroB && window.__heroB.settled && window.__heroB.settled(), null, { timeout: 30000 });
+  await page.waitForFunction((p) => window.__heroB && Math.abs(window.__heroB.target - p) < 0.003 && window.__heroB.settled(), p, { timeout: 30000 });
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r)))));
 }
 
